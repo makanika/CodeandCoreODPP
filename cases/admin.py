@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CaseAssignment, CaseDocumentLink, CaseIdentifier, CaseMovement, CaseReference
+from .models import CaseAssignment, CaseComment, CaseDocumentLink, CaseIdentifier, CaseMovement, CaseReference
 
 @admin.register(CaseReference)
 class CaseReferenceAdmin(admin.ModelAdmin):
@@ -11,5 +11,6 @@ admin.site.register(CaseIdentifier)
 admin.site.register(CaseMovement)
 admin.site.register(CaseAssignment)
 admin.site.register(CaseDocumentLink)
+admin.site.register(CaseComment)
 
 # Register your models here.

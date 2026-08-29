@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ODPP | Staff Directory{% endblock %}
+
+{% block extra_head %}
+<style>
+  body { background: var(--blue-tint); }
+  .dash-utility { background: #11254c; color: #dbe6fa; }
+  .dash-utility__inner { display: flex; align-items: center; justify-content: space-between; min-height: 36px; font-size: .72rem; }
+  .dash-utility a, .dash-signout { border: 0; padding: 0; background: transparent; color: var(--white); font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
+  .dash-account { display: flex; align-items: center; gap: 16px; }.dash-account form { margin: 0; }
+  .dash-brand { border-bottom: 4px solid var(--crest-gold); background: var(--odpp-blue); }.dash-brand__inner { display: flex; align-items: center; gap: 13px; min-height: 72px; }.dash-crest { width: 47px; height: 47px; object-fit: contain; }
+  .dash-brand p { margin: 0 0 3px; color: var(--crest-gold); font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }.dash-brand h1 { margin: 0; color: var(--white); font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.05rem; font-weight: 700; }.dash-brand span { color: #dbe6fa; font-size: .72rem; }
+  .dash-page { padding: 16px 0 36px; }.dash-back { display: inline-block; margin-bottom: 10px; color: var(--deep-blue); font-size: .76rem; font-weight: 700; text-decoration: none; }.dash-head { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 13px; }.dash-overline { margin: 0 0 4px; color: var(--crest-red); font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }.dash-head h2 { margin: 0; color: var(--deep-blue); font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.3rem; font-weight: 700; }
+  .dash-metrics { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); background: var(--white); margin-bottom: 14px; }.dash-metric { min-height: 70px; padding: 12px 14px; border-right: 1px solid var(--line); }.dash-metric:last-child { border-right: 0; }.dash-metric strong { display: block; color: var(--deep-blue); font-size: 1.42rem; line-height: 1; }.dash-metric span { display: block; margin-top: 5px; color: var(--muted); font-size: .61rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }.dash-metric--risk { background: #fff8f8; }.dash-metric--risk strong { color: var(--crest-red); }
+  .dash-panel { padding: 6px; border-top: 3px solid var(--odpp-blue); background: var(--white); box-shadow: var(--shadow-subtle); }
+  .staff-table { width: 100%; border-collapse: collapse; font-size: .8rem; }.staff-table th { padding: 11px 14px; background: #f5f8fd; color: var(--deep-blue); text-align: left; font-size: .61rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--line); }.staff-table td { padding: 12px 14px; border-bottom: 1px solid #e2e8f1; vertical-align: middle; }.staff-table tr:last-child td { border-bottom: 0; }.staff-table tr:hover td { background: #fafcff; }
+  .staff-person { display: flex; align-items: center; gap: 10px; }.staff-avatar { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: var(--deep-blue); color: var(--white); font-weight: 700; font-size: .74rem; flex-shrink: 0; }.staff-person strong { display: block; color: var(--deep-blue); font-size: .82rem; }.staff-person span { display: block; color: var(--muted); font-size: .68rem; }
+  .staff-count { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 22px; padding: 0 7px; border-radius: 999px; background: var(--blue-tint); color: var(--deep-blue); font-size: .74rem; font-weight: 700; }.staff-count--risk { background: #fde4e5; color: #a8171d; }.staff-count--zero { background: #f0f2f5; color: var(--muted); }
+  .dash-link { color: var(--deep-blue); font-size: .78rem; font-weight: 700; text-decoration: none; }.dash-link:hover { color: var(--crest-red); text-decoration: underline; }
+  @media (max-width: 850px) { .dash-metrics { grid-template-columns: repeat(2, 1fr); }.dash-metric:nth-child(2n) { border-right: 0; }.dash-metric:nth-child(-n + 2) { border-bottom: 1px solid var(--line); } }
+  @media (max-width: 640px) { .dash-panel { overflow-x: auto; }.staff-table { min-width: 640px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<header>
+  <div class="dash-utility"><div class="odpp-container dash-utility__inner"><span>Complaints Management System · Directorate overview</span><div class="dash-account"><span>{{ profile.account.get_full_name|default:profile.account.username }}</span>{% include 'partials/staff_nav.html' %}</div></div></div>
+  <div class="dash-brand"><div class="odpp-container dash-brand__inner"><img class="dash-crest" src="{% static 'odpp-crest.png' %}" alt="Office of the Director of Public Prosecutions coat of arms"><div><p>Republic of Uganda</p><h1>Office of the Director of Public Prosecutions</h1><span>Directorate Staff Overview</span></div></div></div>
+</header>
+<main class="dash-page"><div class="odpp-container">
+  <a class="dash-back" href="{% url 'dashboard' %}">Back to dashboard</a>
+  <section class="dash-head"><div><p class="dash-overline">Organisation-wide</p><h2>Staff Directory</h2></div></section>
+  <section class="dash-metrics" aria-label="Organisation-wide workload"><div class="dash-metric"><strong>{{ org_staff_count }}</strong><span>Active staff</span></div><div class="dash-metric"><strong>{{ org_active_complaint_count }}</strong><span>Active complaints</span></div><div class="dash-metric dash-metric--risk"><strong>{{ org_overdue_count }}</strong><span>Overdue org-wide</span></div><div class="dash-metric"><strong>{{ org_active_case_count }}</strong><span>Open case contexts</span></div></section>
+  <section class="dash-panel"><table class="staff-table"><thead><tr><th>Staff member</th><th>Role</th><th>Office</th><th>Active complaints</th><th>Active cases</th><th></th></tr></thead><tbody>
+  {% for member in staff_members %}<tr><td><div class="staff-person"><span class="staff-avatar">{{ member.account.first_name|slice:':1' }}{{ member.account.last_name|slice:':1' }}</span><div><strong>{{ member.account.get_full_name|default:member.account.username }}</strong><span>{{ member.officer_number }}{% if member.rank %} · {{ member.rank }}{% endif %}</span></div></div></td><td>{{ member.get_role_display }}<span class="dash-muted" style="display:block;color:var(--muted);font-size:.68rem;">{{ member.get_organisation_display }}</span></td><td>{{ member.current_office|default:'Not recorded' }}</td><td>{% if member.active_complaint_count %}<span class="staff-count">{{ member.active_complaint_count }}</span>{% else %}<span class="staff-count staff-count--zero">0</span>{% endif %}</td><td>{% if member.active_case_count %}<span class="staff-count">{{ member.active_case_count }}</span>{% else %}<span class="staff-count staff-count--zero">0</span>{% endif %}</td><td><a class="dash-link" href="{% url 'staff-workload' member.pk %}">View workload</a></td></tr>
+  {% empty %}<tr><td colspan="6" style="padding:20px 14px;color:var(--muted);">No active staff records found.</td></tr>{% endfor %}
+  </tbody></table></section>
+</div></main>
+{% endblock %}

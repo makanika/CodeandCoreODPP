@@ -59,7 +59,7 @@ def visible_complaints_for(profile):
     return queryset.filter(filters).distinct()
 
 
-def create_complaint(*, intake_channel, complainant_name, subject, narrative, related_case=None, supplied_case_reference='', complainant_phone='', complainant_email='', preferred_contact_channel='', captured_by=None, source_evidence_reference='', is_demo=False):
+def create_complaint(*, intake_channel, complainant_name, subject, narrative, related_case=None, supplied_case_reference='', complainant_nin='', complainant_phone='', complainant_email='', preferred_contact_channel='', captured_by=None, source_evidence_reference='', is_demo=False):
     now = timezone.now()
     with transaction.atomic():
         sequence, _ = ComplaintSequence.objects.select_for_update().get_or_create(year=now.year)
@@ -74,6 +74,7 @@ def create_complaint(*, intake_channel, complainant_name, subject, narrative, re
             captured_by=captured_by,
             source_evidence_reference=source_evidence_reference,
             complainant_name=complainant_name,
+            complainant_nin=complainant_nin,
             complainant_phone=complainant_phone,
             complainant_email=complainant_email,
             preferred_contact_channel=preferred_contact_channel,
@@ -176,6 +177,17 @@ def transition_type_b(complaint, *, resulting_status, actor=None, detail, automa
         previous_status=previous_status,
         resulting_status=resulting_status,
         automatic=automatic,
+    )
+
+
+def add_complaint_comment(complaint, *, actor, detail):
+    return ComplaintEvent.objects.create(
+        complaint=complaint,
+        event_type=ComplaintEvent.EventType.COMMENT,
+        actor=actor,
+        detail=detail,
+        previous_status=complaint.status,
+        resulting_status=complaint.status,
     )
 
 

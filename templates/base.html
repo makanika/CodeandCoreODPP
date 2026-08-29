@@ -12,5 +12,5 @@
   <link rel="stylesheet" href="{% static 'odpp.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
-<body>{% block content %}{% endblock %}</body>
+<body>{% if messages %}<ul class="odpp-messages">{% for message in messages %}<li class="odpp-message odpp-message--{{ message.tags }}">{{ message }}</li>{% endfor %}</ul>{% endif %}{% block content %}{% endblock %}</body>
 </html>

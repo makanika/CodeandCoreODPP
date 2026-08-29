@@ -16,6 +16,7 @@ def lodge_complaint(request):
         complaint = create_complaint(
             intake_channel='PUBLIC_PORTAL',
             complainant_name=form.cleaned_data['complainant_name'],
+            complainant_nin=form.cleaned_data['complainant_nin'],
             complainant_phone=form.cleaned_data['complainant_phone'],
             complainant_email=form.cleaned_data['complainant_email'],
             preferred_contact_channel='EMAIL' if form.cleaned_data['complainant_email'] else 'PHONE',

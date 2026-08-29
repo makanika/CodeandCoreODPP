@@ -55,6 +55,7 @@ class Complaint(models.Model):
 	captured_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name='captured_complaints')
 	source_evidence_reference = models.CharField(max_length=160, blank=True)
 	complainant_name = models.CharField(max_length=160)
+	complainant_nin = models.CharField(max_length=14, blank=True, verbose_name='Complainant NIN')
 	complainant_phone = models.CharField(max_length=32, blank=True)
 	complainant_email = models.EmailField(blank=True)
 	preferred_contact_channel = models.CharField(max_length=20, blank=True)
@@ -160,6 +161,7 @@ class ComplaintEvent(models.Model):
 		WITHDRAWN = 'WITHDRAWN', 'Withdrawn'
 		REFERRED_OUT = 'REFERRED_OUT', 'Referred out'
 		TYPE_A_HANDOFF = 'TYPE_A_HANDOFF', 'Transferred to conduct'
+		COMMENT = 'COMMENT', 'Comment added'
 
 	complaint = models.ForeignKey(Complaint, on_delete=models.PROTECT, related_name='events')
 	event_type = models.CharField(max_length=20, choices=EventType.choices)

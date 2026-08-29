@@ -60,6 +60,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'core.urls'
 AUTH_USER_MODEL = 'accounts.Account'
+LOGIN_URL = 'staff-login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'staff-login'
 

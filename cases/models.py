@@ -14,7 +14,16 @@ class CaseReference(models.Model):
 		DFI_ISSUED = 'DFI_ISSUED', 'DFI issued'
 		SANCTIONED = 'SANCTIONED', 'Sanctioned'
 		BEFORE_COURT = 'BEFORE_COURT', 'Before court'
+		HEARING = 'HEARING', 'Hearing / trial'
+		JUDGEMENT_DELIVERED = 'JUDGEMENT_DELIVERED', 'Judgement delivered'
 		CLOSED = 'CLOSED', 'Closed'
+
+	class JudgementOutcome(models.TextChoices):
+		CONVICTED = 'CONVICTED', 'Convicted'
+		ACQUITTED = 'ACQUITTED', 'Acquitted'
+		DISCHARGED = 'DISCHARGED', 'Discharged'
+		WITHDRAWN = 'WITHDRAWN', 'Withdrawn'
+		OTHER = 'OTHER', 'Other'
 
 	class Sensitivity(models.TextChoices):
 		STANDARD = 'STANDARD', 'Standard'
@@ -25,6 +34,7 @@ class CaseReference(models.Model):
 	title = models.CharField(max_length=180)
 	complaint_context = models.CharField(max_length=500)
 	stage = models.CharField(max_length=24, choices=Stage.choices, default=Stage.POLICE_OPENED)
+	judgement_outcome = models.CharField(max_length=16, choices=JudgementOutcome.choices, blank=True)
 	sensitivity = models.CharField(max_length=16, choices=Sensitivity.choices, default=Sensitivity.STANDARD)
 	originating_station = models.ForeignKey(Office, on_delete=models.PROTECT, related_name='originated_cases')
 	responsible_region = models.ForeignKey(Region, on_delete=models.PROTECT, related_name='cases')
@@ -114,4 +124,26 @@ class CaseDocumentLink(models.Model):
 	class Meta:
 		constraints = [models.UniqueConstraint(fields=['case', 'document'], name='unique_case_document_link')]
 
-# Create your models here.
+class CaseComment(models.Model):
+	case = models.ForeignKey(CaseReference, on_delete=models.PROTECT, related_name='comments')
+	author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='case_comments')
+	author_name = models.CharField(max_length=160, editable=False)
+	author_officer_number = models.CharField(max_length=50, blank=True, editable=False)
+	author_role = models.CharField(max_length=32, blank=True, editable=False)
+	body = models.TextField()
+	created_at = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		ordering = ['created_at']
+
+	def save(self, *args, **kwargs):
+		if not self.pk:
+			profile = getattr(self.author, 'staff_profile', None)
+			self.author_name = self.author.get_full_name() or self.author.username
+			if profile:
+				self.author_officer_number = profile.officer_number
+				self.author_role = profile.role
+		super().save(*args, **kwargs)
+
+	def __str__(self):
+		return f'Comment by {self.author_name} on {self.case.reference}'

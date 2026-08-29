@@ -14,14 +14,14 @@
   .profile-masthead__inner { display: flex; align-items: center; gap: 14px; min-height: 78px; }
   .profile-crest { width: 50px; height: 50px; object-fit: contain; }
   .profile-masthead p { margin: 0 0 5px; color: var(--crest-gold); font-size: .67rem; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
-  .profile-masthead h1 { color: var(--white); font-family: "Nunito", sans-serif; font-size: 1.2rem; font-weight: 700; }
+  .profile-masthead h1 { color: var(--white); font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.2rem; font-weight: 700; }
   .profile-masthead span { color: #dbe6fa; font-size: .74rem; }
   .profile-page { padding: 18px 0 36px; }
   .profile-hero { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 16px 0 18px; border-bottom: 1px solid var(--line); }
   .profile-person { display: flex; align-items: center; gap: 17px; min-width: 0; }
   .profile-avatar { display: grid; place-items: center; width: 54px; height: 54px; flex: 0 0 auto; border: 2px solid var(--crest-gold); background: var(--deep-blue); color: var(--white); font-size: 1.1rem; font-weight: 700; }
   .profile-role { margin: 0 0 7px; color: var(--crest-red); font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-  .profile-hero h2 { font-family: "Nunito", sans-serif; font-size: 1.55rem; font-weight: 700; letter-spacing: 0; }
+  .profile-hero h2 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.55rem; font-weight: 700; letter-spacing: 0; }
   .profile-subtitle { margin: 3px 0 0; color: var(--muted); font-size: .8rem; }
   .profile-number { width: 190px; flex: 0 0 190px; padding: 11px 14px; border-left: 4px solid var(--crest-gold); background: var(--white); box-shadow: var(--shadow-subtle); }
   .profile-number span { display: block; color: var(--muted); font-size: .66rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
@@ -66,7 +66,7 @@
 
 {% block content %}
 <header>
-  <div class="profile-utility"><div class="odpp-container profile-utility__inner"><span>Complaints Management System · Authorised staff service</span><form method="post" action="{% url 'staff-logout' %}">{% csrf_token %}<button class="profile-signout" type="submit">Sign out</button></form></div></div>
+  <div class="profile-utility"><div class="odpp-container profile-utility__inner"><span>Complaints Management System · Authorised staff service</span>{% include 'partials/staff_nav.html' %}</div></div>
   <div class="profile-masthead"><div class="odpp-container profile-masthead__inner"><img class="profile-crest" src="{% static 'odpp-crest.png' %}" alt="Office of the Director of Public Prosecutions coat of arms"><div><p>Republic of Uganda</p><h1>Office of the Director of Public Prosecutions</h1><span>Inspections &amp; Quality Assurance</span></div></div></div>
 </header>
 <main class="profile-page"><div class="odpp-container">

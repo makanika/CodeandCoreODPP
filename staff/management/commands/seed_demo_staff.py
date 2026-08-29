@@ -8,38 +8,38 @@ from common.models import Office, Region
 from staff.models import StaffPosting, StaffProfile, StaffScopeAssignment
 
 
-DEMO_START_DATE = date(2026, 8, 29)
-DEFAULT_PASSWORD = 'DEMO-Change-Me-2026!'
+SEED_START_DATE = date(2026, 8, 29)
+DEFAULT_PASSWORD = 'ChangeMe-2026!'
 
 
 class Command(BaseCommand):
-    help = 'Create or update fictional DEMO staff accounts, profiles, postings, and scopes.'
+    help = 'Create or update seed staff accounts, profiles, postings, and scopes for the pilot environment.'
 
     def add_arguments(self, parser):
-        parser.add_argument('--password', default=DEFAULT_PASSWORD, help='Password for newly created DEMO accounts.')
-        parser.add_argument('--reset-passwords', action='store_true', help='Reset every DEMO account password.')
+        parser.add_argument('--password', default=DEFAULT_PASSWORD, help='Password for newly created seed accounts.')
+        parser.add_argument('--reset-passwords', action='store_true', help='Reset every seed account password.')
 
     def handle(self, *args, **options):
         if not settings.DEBUG:
-            raise CommandError('DEMO staff can only be seeded while DJANGO_DEBUG is enabled.')
+            raise CommandError('Seed staff can only be created while DJANGO_DEBUG is enabled.')
 
         offices = self._seed_offices()
         profiles = self._seed_profiles(offices, options['password'], options['reset_passwords'])
         self._seed_postings_and_scopes(profiles, offices)
-        self.stdout.write(self.style.SUCCESS(f'Created or updated {len(profiles)} DEMO staff profiles.'))
-        self.stdout.write('DEMO accounts use the supplied password only in this local development environment.')
+        self.stdout.write(self.style.SUCCESS(f'Created or updated {len(profiles)} staff profiles.'))
+        self.stdout.write('Seed accounts use the supplied password only in this local development environment.')
 
     def _seed_offices(self):
         hq, _ = Office.objects.update_or_create(
-            code='DEMO-HQ',
-            defaults={'name': 'DEMO ODPP Headquarters', 'office_type': Office.OfficeType.HEADQUARTERS},
+            code='ODPP-HQ',
+            defaults={'name': 'ODPP Headquarters', 'office_type': Office.OfficeType.HEADQUARTERS},
         )
         regions = {}
         regional_offices = {}
         for code, name in (
-            ('DEMO-NAK', 'DEMO Nakawa Region'),
-            ('DEMO-MAS', 'DEMO Masaka Region'),
-            ('DEMO-ARU', 'DEMO Arua Region'),
+            ('NAK', 'Nakawa Region'),
+            ('MAS', 'Masaka Region'),
+            ('ARU', 'Arua Region'),
         ):
             region, _ = Region.objects.update_or_create(code=code, defaults={'name': name})
             regions[code] = region
@@ -54,11 +54,11 @@ class Command(BaseCommand):
             )
             regional_offices[code] = regional_office
 
-        offices = {'hq': hq, 'nakawa': regional_offices['DEMO-NAK'], 'masaka': regional_offices['DEMO-MAS'], 'arua': regional_offices['DEMO-ARU']}
+        offices = {'hq': hq, 'nakawa': regional_offices['NAK'], 'masaka': regional_offices['MAS'], 'arua': regional_offices['ARU']}
         for key, code, name, region_code in (
-            ('jinja_station', 'DEMO-JINJA-PS', 'DEMO Jinja Road Police Station', 'DEMO-NAK'),
-            ('masaka_station', 'DEMO-MASAKA-CPS', 'DEMO Masaka Central Police Station', 'DEMO-MAS'),
-            ('arua_station', 'DEMO-ARUA-CPS', 'DEMO Arua Central Police Station', 'DEMO-ARU'),
+            ('jinja_station', 'JINJA-PS', 'Jinja Road Police Station', 'NAK'),
+            ('masaka_station', 'MASAKA-CPS', 'Masaka Central Police Station', 'MAS'),
+            ('arua_station', 'ARUA-CPS', 'Arua Central Police Station', 'ARU'),
         ):
             office, _ = Office.objects.update_or_create(
                 code=code,
@@ -71,9 +71,9 @@ class Command(BaseCommand):
             )
             offices[key] = office
         for key, code, region_code in (
-            ('nakawa_registry', 'DEMO-NAK-REG', 'DEMO-NAK'),
-            ('masaka_registry', 'DEMO-MAS-REG', 'DEMO-MAS'),
-            ('arua_registry', 'DEMO-ARU-REG', 'DEMO-ARU'),
+            ('nakawa_registry', 'NAK-REG', 'NAK'),
+            ('masaka_registry', 'MAS-REG', 'MAS'),
+            ('arua_registry', 'ARU-REG', 'ARU'),
         ):
             office, _ = Office.objects.update_or_create(
                 code=code,
@@ -91,23 +91,24 @@ class Command(BaseCommand):
         Account = get_user_model()
         profiles = {}
         people = (
-            ('dpp', 'demo.dpp', 'Diana', 'Nabirye', 'DEMO-ODPP-001', StaffProfile.Organisation.ODPP, StaffProfile.Role.DPP, 'Director of Public Prosecutions', '', 'hq'),
-            ('deputy', 'demo.deputy', 'Moses', 'Okello', 'DEMO-ODPP-002', StaffProfile.Organisation.ODPP, StaffProfile.Role.DEPUTY_DPP, 'Deputy Director of Public Prosecutions', '', 'hq'),
-            ('director', 'demo.director', 'Grace', 'Atwine', 'DEMO-ODPP-003', StaffProfile.Organisation.ODPP, StaffProfile.Role.DIRECTORATE_HEAD, 'Directorate Head, Inspections and Quality Assurance', '', 'hq'),
-            ('complaints_head', 'demo.complaints', 'Sarah', 'Nakato', 'DEMO-ODPP-004', StaffProfile.Organisation.ODPP, StaffProfile.Role.HEAD_OF_COMPLAINTS, 'Head of Complaints', '', 'hq'),
-            ('internal_affairs', 'demo.internal.affairs', 'Peter', 'Mugisha', 'DEMO-ODPP-005', StaffProfile.Organisation.ODPP, StaffProfile.Role.INTERNAL_AFFAIRS, 'Internal Affairs Officer', '', 'hq'),
-            ('registry_officer', 'demo.registry.hq', 'Juliet', 'Aciro', 'DEMO-ODPP-006', StaffProfile.Organisation.ODPP, StaffProfile.Role.REGISTRY_OFFICER, 'National Registry Officer', '', 'hq'),
-            ('rsa', 'demo.rsa.arua', 'Amina', 'Kato', 'DEMO-ODPP-014', StaffProfile.Organisation.ODPP, StaffProfile.Role.RESIDENT_STATE_ATTORNEY, 'Resident State Attorney', '', 'arua'),
-            ('inspector', 'demo.inspector.arua', 'Ronald', 'Ocen', 'DEMO-ODPP-015', StaffProfile.Organisation.ODPP, StaffProfile.Role.REGIONAL_INSPECTORATE, 'Regional Inspectorate Officer', '', 'arua'),
-            ('registry_clerk', 'demo.registry.arua', 'Mary', 'Akello', 'DEMO-ODPP-016', StaffProfile.Organisation.ODPP, StaffProfile.Role.REGISTRY_CLERK, 'Registry Clerk', '', 'arua_registry'),
-            ('station_supervisor', 'demo.oc.jinja', 'James', 'Okot', 'DEMO-UPF-001', StaffProfile.Organisation.UGANDA_POLICE, StaffProfile.Role.STATION_SUPERVISOR, 'Officer Commanding Station', 'ASP', 'jinja_station'),
-            ('investigating_officer', 'demo.io.jinja', 'Noah', 'Ssemakula', 'DEMO-UPF-002', StaffProfile.Organisation.UGANDA_POLICE, StaffProfile.Role.INVESTIGATING_OFFICER, 'Investigating Officer', 'IP', 'jinja_station'),
-            ('police_liaison', 'demo.liaison.masaka', 'Esther', 'Nansubuga', 'DEMO-UPF-003', StaffProfile.Organisation.UGANDA_POLICE, StaffProfile.Role.POLICE_LIAISON, 'Police Liaison Officer', 'IP', 'masaka_station'),
+            ('dpp', 'linus.anguzu@odpp.local', 'Linus', 'Anguzu', 'ODPP-001', StaffProfile.Organisation.ODPP, StaffProfile.Role.DPP, 'Director of Public Prosecutions', '', 'hq'),
+            ('deputy', 'moses.okello@odpp.local', 'Moses', 'Okello', 'ODPP-002', StaffProfile.Organisation.ODPP, StaffProfile.Role.DEPUTY_DPP, 'Deputy Director of Public Prosecutions', '', 'hq'),
+            ('director', 'grace.atwine@odpp.local', 'Grace', 'Atwine', 'ODPP-003', StaffProfile.Organisation.ODPP, StaffProfile.Role.DIRECTORATE_HEAD, 'Directorate Head, Inspections and Quality Assurance', '', 'hq'),
+            ('complaints_head', 'sarah.nakato@odpp.local', 'Sarah', 'Nakato', 'ODPP-004', StaffProfile.Organisation.ODPP, StaffProfile.Role.HEAD_OF_COMPLAINTS, 'Head of Complaints', '', 'hq'),
+            ('internal_affairs', 'peter.mugisha@odpp.local', 'Peter', 'Mugisha', 'ODPP-005', StaffProfile.Organisation.ODPP, StaffProfile.Role.INTERNAL_AFFAIRS, 'Internal Affairs Officer', '', 'hq'),
+            ('registry_officer', 'juliet.aciro@odpp.local', 'Juliet', 'Aciro', 'ODPP-006', StaffProfile.Organisation.ODPP, StaffProfile.Role.REGISTRY_OFFICER, 'National Registry Officer', '', 'hq'),
+            ('rsa', 'amina.kato@odpp.local', 'Amina', 'Kato', 'ODPP-014', StaffProfile.Organisation.ODPP, StaffProfile.Role.RESIDENT_STATE_ATTORNEY, 'Resident State Attorney', '', 'arua'),
+            ('inspector', 'ronald.ocen@odpp.local', 'Ronald', 'Ocen', 'ODPP-015', StaffProfile.Organisation.ODPP, StaffProfile.Role.REGIONAL_INSPECTORATE, 'Regional Inspectorate Officer', '', 'arua'),
+            ('registry_clerk', 'mary.akello@odpp.local', 'Mary', 'Akello', 'ODPP-016', StaffProfile.Organisation.ODPP, StaffProfile.Role.REGISTRY_CLERK, 'Registry Clerk', '', 'arua_registry'),
+            ('station_supervisor', 'james.okot@upf.local', 'James', 'Okot', 'UPF-001', StaffProfile.Organisation.UGANDA_POLICE, StaffProfile.Role.STATION_SUPERVISOR, 'Officer Commanding Station', 'ASP', 'jinja_station'),
+            ('investigating_officer', 'noah.ssemakula@upf.local', 'Noah', 'Ssemakula', 'UPF-002', StaffProfile.Organisation.UGANDA_POLICE, StaffProfile.Role.INVESTIGATING_OFFICER, 'Investigating Officer', 'IP', 'jinja_station'),
+            ('police_liaison', 'esther.nansubuga@upf.local', 'Esther', 'Nansubuga', 'UPF-003', StaffProfile.Organisation.UGANDA_POLICE, StaffProfile.Role.POLICE_LIAISON, 'Police Liaison Officer', 'IP', 'masaka_station'),
         )
         for key, username, first_name, last_name, officer_number, organisation, role, title, rank, office_key in people:
+            email = username if '@' in username else f'{username}@odpp.local'
             account, created = Account.objects.update_or_create(
                 username=username,
-                defaults={'first_name': first_name, 'last_name': last_name, 'email': f'{username}@demo.odpp.local', 'is_active': True},
+                defaults={'first_name': first_name, 'last_name': last_name, 'email': email, 'is_active': True},
             )
             if created or reset_passwords:
                 account.set_password(password)
@@ -154,10 +155,10 @@ class Command(BaseCommand):
                     'reports_to': manager,
                     'job_title': profile.job_title,
                     'rank': profile.rank,
-                    'effective_from': DEMO_START_DATE,
+                    'effective_from': SEED_START_DATE,
                     'effective_until': None,
                     'recorded_by': dpp_account,
-                    'reason': 'DEMO initial operational posting',
+                    'reason': 'Initial operational posting',
                 },
             )
             scope_level = StaffScopeAssignment.ScopeLevel.NATIONAL if key in {'dpp', 'deputy', 'director', 'complaints_head', 'internal_affairs', 'registry_officer'} else StaffScopeAssignment.ScopeLevel.OFFICE
@@ -167,9 +168,9 @@ class Command(BaseCommand):
                 scope_level=scope_level,
                 office=scope_office,
                 defaults={
-                    'assigned_from': DEMO_START_DATE,
+                    'assigned_from': SEED_START_DATE,
                     'assigned_until': None,
                     'assigned_by': dpp_account,
-                    'reason': 'DEMO initial access assignment',
+                    'reason': 'Initial access assignment',
                 },
             )

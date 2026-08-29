@@ -1,15 +1,22 @@
 from datetime import timedelta
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Count, Q
+from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
-from django.views.generic import TemplateView
+from django.views.generic import ListView, TemplateView
 from django.views.generic.detail import DetailView
 
-from cases.services import visible_cases_for
+from cases.forms import CaseAssignmentForm, CaseCommentForm, CaseMoveForm, CaseStageForm
+from cases.models import CaseReference
+from cases.services import add_case_comment, advance_case_stage, assign_case, move_case, visible_cases_for
+from complaints.forms import ComplaintAssignmentForm, ComplaintCommentForm
 from complaints.models import Complaint, ComplaintEvent
-from complaints.services import visible_complaints_for
+from complaints.services import add_complaint_comment, assign_complaint, visible_complaints_for
 from documents.models import Document
 from staff.models import StaffProfile
+from staff.permissions import is_director
 
 
 class OperationalDashboardView(LoginRequiredMixin, TemplateView):
@@ -39,6 +46,7 @@ class OperationalDashboardView(LoginRequiredMixin, TemplateView):
 		context.update(
 			profile=profile,
 			role_workspace=self._workspace_label(profile.role),
+			is_director=is_director(profile),
 			now=now,
 			complaint_count=active_complaints.count(),
 			visible_complaint_count=complaints.count(),
@@ -61,13 +69,14 @@ class OperationalDashboardView(LoginRequiredMixin, TemplateView):
 				complaints.filter(status=Complaint.Status.ESCALATED_HQ).count(),
 				complaints.filter(status__in=[Complaint.Status.RESOLVED_RSA, Complaint.Status.RESOLVED_REGIONAL]).count(),
 			],
-			case_chart_labels=['Police', 'In transit', 'ODPP', 'Perusal', 'Outcome'],
+			case_chart_labels=['Police', 'In transit', 'ODPP', 'Perusal', 'Court', 'Closed'],
 			case_chart_values=[
 				cases.filter(stage__in=['POLICE_OPENED', 'POLICE_PREPARING']).count(),
 				cases.filter(stage='DISPATCHED_TO_ODPP').count(),
 				cases.filter(stage='ODPP_RECEIVED').count(),
-				cases.filter(stage__in=['UNDER_PERUSAL', 'DFI_ISSUED']).count(),
-				cases.filter(stage__in=['SANCTIONED', 'BEFORE_COURT', 'CLOSED']).count(),
+				cases.filter(stage__in=['UNDER_PERUSAL', 'DFI_ISSUED', 'SANCTIONED']).count(),
+				cases.filter(stage__in=['BEFORE_COURT', 'HEARING']).count(),
+				cases.filter(stage__in=['JUDGEMENT_DELIVERED', 'CLOSED']).count(),
 			],
 			activity_chart_labels=[trend_date.strftime('%d %b') for trend_date in trend_dates],
 			activity_chart_values=[
@@ -110,3 +119,235 @@ class ComplaintDetailView(LoginRequiredMixin, DetailView):
 			'communications__recorded_by',
 			'document_links__document',
 		)
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		profile = StaffProfile.objects.get(account=self.request.user)
+		context['profile'] = profile
+		context['is_director'] = is_director(profile)
+		context['assignment_form'] = kwargs.get('assignment_form') or ComplaintAssignmentForm(
+			requesting_profile=profile,
+			initial={'assignee': context['complaint'].assigned_to_id},
+		)
+		context['comment_form'] = kwargs.get('comment_form') or ComplaintCommentForm()
+		return context
+
+	def post(self, request, *args, **kwargs):
+		self.object = self.get_object()
+		profile = StaffProfile.objects.get(account=request.user)
+		action = request.POST.get('action')
+		if action == 'assign':
+			if not is_director(profile):
+				messages.error(request, 'Only directorate-level staff can reassign a complaint.')
+				return redirect('complaint-detail', pk=self.object.pk)
+			form = ComplaintAssignmentForm(request.POST, requesting_profile=profile)
+			if form.is_valid():
+				try:
+					assign_complaint(
+						self.object,
+						assignee=form.cleaned_data['assignee'],
+						assigned_by=profile,
+						reason=form.cleaned_data['reason'],
+					)
+					messages.success(request, f'Complaint {self.object.reference} assigned to {form.cleaned_data["assignee"]}.')
+					return redirect('complaint-detail', pk=self.object.pk)
+				except ValueError as exc:
+					messages.error(request, str(exc))
+			return self.render_to_response(self.get_context_data(assignment_form=form))
+		if action == 'comment':
+			form = ComplaintCommentForm(request.POST)
+			if form.is_valid():
+				add_complaint_comment(self.object, actor=profile, detail=form.cleaned_data['body'])
+				messages.success(request, 'Comment recorded.')
+				return redirect('complaint-detail', pk=self.object.pk)
+			return self.render_to_response(self.get_context_data(comment_form=form))
+		messages.error(request, 'Unrecognised action.')
+		return redirect('complaint-detail', pk=self.object.pk)
+
+
+class CaseDetailView(LoginRequiredMixin, DetailView):
+	model = CaseReference
+	template_name = 'cases/detail.html'
+	context_object_name = 'case'
+
+	def get_queryset(self):
+		profile = StaffProfile.objects.get(account=self.request.user)
+		return visible_cases_for(profile).select_related(
+			'originating_station',
+			'responsible_region',
+			'current_office',
+			'current_custodian',
+			'allocated_to',
+		).prefetch_related(
+			'identifiers',
+			'movements__sent_from',
+			'movements__sent_to',
+			'movements__sent_by',
+			'movements__received_by',
+			'assignments__assignee',
+			'comments',
+			'document_links__document',
+		)
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		profile = StaffProfile.objects.get(account=self.request.user)
+		case = context['case']
+		context['profile'] = profile
+		context['is_director'] = is_director(profile)
+		context['assignment_form'] = kwargs.get('assignment_form') or CaseAssignmentForm(
+			requesting_profile=profile,
+			initial={'assignee': case.allocated_to_id},
+		)
+		context['move_form'] = kwargs.get('move_form') or CaseMoveForm(
+			requesting_profile=profile,
+			initial={'sent_to': case.current_office_id, 'received_by': case.current_custodian_id},
+		)
+		context['comment_form'] = kwargs.get('comment_form') or CaseCommentForm()
+		context['stage_form'] = kwargs.get('stage_form') or CaseStageForm(initial={'new_stage': case.stage})
+		return context
+
+	def post(self, request, *args, **kwargs):
+		self.object = self.get_object()
+		profile = StaffProfile.objects.get(account=request.user)
+		action = request.POST.get('action')
+		if action == 'advance_stage':
+			if not is_director(profile):
+				messages.error(request, 'Only directorate-level staff can advance a case stage.')
+				return redirect('case-detail', pk=self.object.pk)
+			form = CaseStageForm(request.POST)
+			if form.is_valid():
+				try:
+					advance_case_stage(
+						self.object,
+						new_stage=form.cleaned_data['new_stage'],
+						actor=request.user,
+						note=form.cleaned_data['note'],
+						judgement_outcome=form.cleaned_data['judgement_outcome'],
+					)
+					messages.success(request, f'Case {self.object.reference} advanced to {self.object.get_stage_display()}.')
+					return redirect('case-detail', pk=self.object.pk)
+				except ValueError as exc:
+					messages.error(request, str(exc))
+			return self.render_to_response(self.get_context_data(stage_form=form))
+		if action == 'assign':
+			if not is_director(profile):
+				messages.error(request, 'Only directorate-level staff can allocate a case.')
+				return redirect('case-detail', pk=self.object.pk)
+			form = CaseAssignmentForm(request.POST, requesting_profile=profile)
+			if form.is_valid():
+				assign_case(self.object, assignee=form.cleaned_data['assignee'], assigned_by=profile, reason=form.cleaned_data['reason'])
+				messages.success(request, f'Case {self.object.reference} allocated to {form.cleaned_data["assignee"]}.')
+				return redirect('case-detail', pk=self.object.pk)
+			return self.render_to_response(self.get_context_data(assignment_form=form))
+		if action == 'move':
+			if not is_director(profile):
+				messages.error(request, 'Only directorate-level staff can move a case file.')
+				return redirect('case-detail', pk=self.object.pk)
+			form = CaseMoveForm(request.POST, requesting_profile=profile)
+			if form.is_valid():
+				move_case(
+					self.object,
+					movement_type=form.cleaned_data['movement_type'],
+					sent_to=form.cleaned_data['sent_to'],
+					sent_by=profile,
+					received_by=form.cleaned_data['received_by'],
+					declared_contents=form.cleaned_data['declared_contents'],
+					note=form.cleaned_data['note'],
+				)
+				messages.success(request, f'Case {self.object.reference} moved to {form.cleaned_data["sent_to"]}.')
+				return redirect('case-detail', pk=self.object.pk)
+			return self.render_to_response(self.get_context_data(move_form=form))
+		if action == 'comment':
+			form = CaseCommentForm(request.POST)
+			if form.is_valid():
+				add_case_comment(self.object, author=request.user, body=form.cleaned_data['body'])
+				messages.success(request, 'Comment recorded.')
+				return redirect('case-detail', pk=self.object.pk)
+			return self.render_to_response(self.get_context_data(comment_form=form))
+		messages.error(request, 'Unrecognised action.')
+		return redirect('case-detail', pk=self.object.pk)
+
+
+class DirectorRequiredMixin(UserPassesTestMixin):
+	raise_exception = True
+
+	def test_func(self):
+		profile = StaffProfile.objects.filter(account=self.request.user).first()
+		return bool(profile and is_director(profile))
+
+
+class StaffDirectoryView(LoginRequiredMixin, DirectorRequiredMixin, ListView):
+	model = StaffProfile
+	template_name = 'dashboard/staff_directory.html'
+	context_object_name = 'staff_members'
+
+	def get_queryset(self):
+		active_statuses = [
+			Complaint.Status.RECEIVED,
+			Complaint.Status.OPEN_RSA,
+			Complaint.Status.ESCALATED_REGIONAL,
+			Complaint.Status.ESCALATED_HQ,
+		]
+		return StaffProfile.objects.filter(is_active=True).select_related('account', 'current_office').annotate(
+			active_complaint_count=Count(
+				'assigned_complaints',
+				filter=Q(assigned_complaints__status__in=active_statuses) & ~Q(assigned_complaints__classification=Complaint.Classification.TYPE_A_HANDOFF),
+				distinct=True,
+			),
+			active_case_count=Count('allocated_cases', distinct=True),
+		).order_by('-active_complaint_count', 'account__last_name')
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['profile'] = StaffProfile.objects.get(account=self.request.user)
+		context['is_director'] = True
+		active_statuses = [
+			Complaint.Status.RECEIVED,
+			Complaint.Status.OPEN_RSA,
+			Complaint.Status.ESCALATED_REGIONAL,
+			Complaint.Status.ESCALATED_HQ,
+		]
+		org_complaints = Complaint.objects.exclude(classification=Complaint.Classification.TYPE_A_HANDOFF).filter(status__in=active_statuses)
+		context['org_active_complaint_count'] = org_complaints.count()
+		context['org_overdue_count'] = org_complaints.filter(sla_due_at__lt=timezone.now()).count()
+		context['org_unassigned_count'] = org_complaints.filter(assigned_to__isnull=True).count()
+		context['org_active_case_count'] = CaseReference.objects.exclude(stage=CaseReference.Stage.CLOSED).count()
+		context['org_staff_count'] = context['staff_members'].count() if hasattr(context['staff_members'], 'count') else len(context['staff_members'])
+		return context
+
+
+class StaffWorkloadView(LoginRequiredMixin, DirectorRequiredMixin, DetailView):
+	model = StaffProfile
+	template_name = 'dashboard/staff_workload.html'
+	context_object_name = 'staff_member'
+
+	def get_queryset(self):
+		return StaffProfile.objects.select_related('account', 'current_office').prefetch_related(
+			'postings__office',
+			'postings__reports_to__account',
+		)
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		staff_member = context['staff_member']
+		context['profile'] = StaffProfile.objects.get(account=self.request.user)
+		context['is_director'] = True
+		active_statuses = [
+			Complaint.Status.RECEIVED,
+			Complaint.Status.OPEN_RSA,
+			Complaint.Status.ESCALATED_REGIONAL,
+			Complaint.Status.ESCALATED_HQ,
+		]
+		context['assigned_complaints'] = Complaint.objects.filter(assigned_to=staff_member).exclude(
+			classification=Complaint.Classification.TYPE_A_HANDOFF,
+		).filter(status__in=active_statuses).select_related('related_case', 'assigned_office').order_by('sla_due_at')
+		context['allocated_cases'] = CaseReference.objects.filter(allocated_to=staff_member).select_related('current_office', 'originating_station').order_by('expected_action_on')
+		context['direct_reportees'] = StaffProfile.objects.filter(
+			postings__reports_to=staff_member,
+			postings__is_primary=True,
+			is_active=True,
+		).select_related('account', 'current_office').distinct()
+		context['primary_posting'] = next((posting for posting in staff_member.postings.all() if posting.is_primary), None)
+		context['now'] = timezone.now()
+		return context

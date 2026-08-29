@@ -14,17 +14,17 @@ def kampala_datetime(year, month, day, hour, minute):
 
 
 class Command(BaseCommand):
-    help = 'Create or update detailed fictional DEMO complaint-context case records.'
+    help = 'Create or update seed complaint-context case records for the pilot environment.'
 
     def handle(self, *args, **options):
         if not settings.DEBUG:
-            raise CommandError('DEMO cases can only be seeded while DJANGO_DEBUG is enabled.')
+            raise CommandError('Seed cases can only be created while DJANGO_DEBUG is enabled.')
 
         offices = {office.code: office for office in Office.objects.all()}
         profiles = {profile.officer_number: profile for profile in StaffProfile.objects.all()}
-        required_offices = {'DEMO-JINJA-PS', 'DEMO-MASAKA-CPS', 'DEMO-ARUA-CPS', 'DEMO-NAK-ODPP', 'DEMO-MAS-ODPP', 'DEMO-ARU-ODPP', 'DEMO-NAK-REG', 'DEMO-MAS-REG', 'DEMO-ARU-REG'}
+        required_offices = {'JINJA-PS', 'MASAKA-CPS', 'ARUA-CPS', 'NAK-ODPP', 'MAS-ODPP', 'ARU-ODPP', 'NAK-REG', 'MAS-REG', 'ARU-REG'}
         if required_offices - offices.keys():
-            raise CommandError('Run seed_demo_staff before seeding DEMO cases.')
+            raise CommandError('Run seed_demo_staff before seeding cases.')
 
         records = self._records(offices, profiles)
         for record in records:
@@ -32,44 +32,47 @@ class Command(BaseCommand):
             self._upsert_identifiers(case, record, offices, profiles)
             self._upsert_movements(case, record, offices, profiles)
             self._upsert_assignment(case, record, profiles)
-        self.stdout.write(self.style.SUCCESS(f'Created or updated {len(records)} DEMO case records.'))
+        self.stdout.write(self.style.SUCCESS(f'Created or updated {len(records)} case records.'))
 
     def _profile(self, profiles, officer_number):
         try:
             return profiles[officer_number]
         except KeyError as exc:
-            raise CommandError(f'Missing DEMO staff profile {officer_number}. Run seed_demo_staff first.') from exc
+            raise CommandError(f'Missing seed staff profile {officer_number}. Run seed_demo_staff first.') from exc
 
     def _records(self, offices, profiles):
         station_specs = (
-            ('JINJA', 'DEMO-JINJA-PS', 'DEMO-NAK', 'DEMO-NAK-ODPP', 'DEMO-NAK-REG', 'DEMO-UPF-002'),
-            ('MAS', 'DEMO-MASAKA-CPS', 'DEMO-MAS', 'DEMO-MAS-ODPP', 'DEMO-MAS-REG', 'DEMO-UPF-003'),
-            ('ARU', 'DEMO-ARUA-CPS', 'DEMO-ARU', 'DEMO-ARU-ODPP', 'DEMO-ARU-REG', 'DEMO-ODPP-014'),
+            ('JINJA', 'JINJA-PS', 'NAK', 'NAK-ODPP', 'NAK-REG', 'UPF-002'),
+            ('MAS', 'MASAKA-CPS', 'MAS', 'MAS-ODPP', 'MAS-REG', 'UPF-003'),
+            ('ARU', 'ARUA-CPS', 'ARU', 'ARU-ODPP', 'ARU-REG', 'ODPP-014'),
         )
         stages = (
-            (CaseReference.Stage.POLICE_OPENED, CaseReference.Sensitivity.STANDARD, 'Initial complaint context recorded; station follow-up is pending.', 2),
-            (CaseReference.Stage.POLICE_PREPARING, CaseReference.Sensitivity.RESTRICTED, 'Complainant reports delayed feedback while station records are being prepared.', 4),
-            (CaseReference.Stage.DISPATCHED_TO_ODPP, CaseReference.Sensitivity.STANDARD, 'Complainant asks for confirmation that the dispatched file reached the responsible registry.', 5),
-            (CaseReference.Stage.ODPP_RECEIVED, CaseReference.Sensitivity.RESTRICTED, 'Complaint context concerns delay between registry receipt and allocation.', 7),
-            (CaseReference.Stage.UNDER_PERUSAL, CaseReference.Sensitivity.CONFIDENTIAL, 'Complaint context concerns a perusal delay and absent communication of the next step.', 10),
-            (CaseReference.Stage.DFI_ISSUED, CaseReference.Sensitivity.RESTRICTED, 'Complaint context concerns unclear follow-up after further investigation was directed.', 13),
-            (CaseReference.Stage.SANCTIONED, CaseReference.Sensitivity.STANDARD, 'Complaint context concerns confirmation of the prosecution decision and next communication.', 16),
-            (CaseReference.Stage.BEFORE_COURT, CaseReference.Sensitivity.RESTRICTED, 'Complaint context concerns custody and status communication after court transfer.', 19),
-            (CaseReference.Stage.CLOSED, CaseReference.Sensitivity.STANDARD, 'Complaint context concerns final communication and retrieval of the closure outcome.', 22),
+            (CaseReference.Stage.POLICE_OPENED, CaseReference.Sensitivity.STANDARD, 'Initial complaint context recorded; station follow-up is pending.', 2, ''),
+            (CaseReference.Stage.POLICE_PREPARING, CaseReference.Sensitivity.RESTRICTED, 'Complainant reports delayed feedback while station records are being prepared.', 4, ''),
+            (CaseReference.Stage.DISPATCHED_TO_ODPP, CaseReference.Sensitivity.STANDARD, 'Complainant asks for confirmation that the dispatched file reached the responsible registry.', 5, ''),
+            (CaseReference.Stage.ODPP_RECEIVED, CaseReference.Sensitivity.RESTRICTED, 'Complaint context concerns delay between registry receipt and allocation.', 7, ''),
+            (CaseReference.Stage.UNDER_PERUSAL, CaseReference.Sensitivity.CONFIDENTIAL, 'Complaint context concerns a perusal delay and absent communication of the next step.', 10, ''),
+            (CaseReference.Stage.DFI_ISSUED, CaseReference.Sensitivity.RESTRICTED, 'Complaint context concerns unclear follow-up after further investigation was directed.', 13, ''),
+            (CaseReference.Stage.SANCTIONED, CaseReference.Sensitivity.STANDARD, 'Complaint context concerns confirmation of the prosecution decision and next communication.', 16, ''),
+            (CaseReference.Stage.BEFORE_COURT, CaseReference.Sensitivity.RESTRICTED, 'Complaint context concerns custody and status communication after court transfer.', 19, ''),
+            (CaseReference.Stage.HEARING, CaseReference.Sensitivity.RESTRICTED, 'Complaint context concerns communication during an ongoing hearing.', 21, ''),
+            (CaseReference.Stage.JUDGEMENT_DELIVERED, CaseReference.Sensitivity.STANDARD, 'Complaint context concerns communication of the delivered judgement.', 23, CaseReference.JudgementOutcome.CONVICTED),
+            (CaseReference.Stage.CLOSED, CaseReference.Sensitivity.STANDARD, 'Complaint context concerns final communication and retrieval of the closure outcome.', 25, CaseReference.JudgementOutcome.ACQUITTED),
         )
         records = []
-        for index, (stage, sensitivity, context, day) in enumerate(stages, start=1):
+        for index, (stage, sensitivity, context, day, judgement_outcome) in enumerate(stages, start=1):
             prefix, station_code, region_code, odpp_code, registry_code, handler_number = station_specs[(index - 1) % len(station_specs)]
             handler = self._profile(profiles, handler_number)
-            rsa = self._profile(profiles, 'DEMO-ODPP-014')
+            rsa = self._profile(profiles, 'ODPP-014')
             current_office = offices[station_code] if stage in {CaseReference.Stage.POLICE_OPENED, CaseReference.Stage.POLICE_PREPARING} else offices[odpp_code]
             if stage == CaseReference.Stage.DISPATCHED_TO_ODPP:
                 current_office = offices[station_code]
             records.append({
-                'reference': f'DEMO/CASE/{prefix}/2026/{index:04d}',
-                'title': f'DEMO complaint-context record {prefix}-{index:04d}',
+                'reference': f'{prefix}/2026/{index:04d}',
+                'title': f'Complaint-context record {prefix}-{index:04d}',
                 'context': context,
                 'stage': stage,
+                'judgement_outcome': judgement_outcome,
                 'sensitivity': sensitivity,
                 'station_code': station_code,
                 'region_code': region_code,
@@ -98,6 +101,7 @@ class Command(BaseCommand):
                 'title': record['title'],
                 'complaint_context': record['context'],
                 'stage': record['stage'],
+                'judgement_outcome': record['judgement_outcome'],
                 'sensitivity': record['sensitivity'],
                 'originating_station': station,
                 'responsible_region': region,
@@ -129,8 +133,8 @@ class Command(BaseCommand):
         station = offices[record['station_code']]
         registry = offices[record['registry_code']]
         movement_specs = (
-            (CaseMovement.MovementType.DISPATCH, station, registry, record['handler'], None, 'DEMO station file cover and verified SD/CRB references', False),
-            (CaseMovement.MovementType.RECEIPT, registry, offices[record['current_office_code']], record['handler'], record['rsa'], 'DEMO registry receipt and complaint-context reference pack', True),
+            (CaseMovement.MovementType.DISPATCH, station, registry, record['handler'], None, 'Station file cover and verified SD/CRB references', False),
+            (CaseMovement.MovementType.RECEIPT, registry, offices[record['current_office_code']], record['handler'], record['rsa'], 'Registry receipt and complaint-context reference pack', True),
         )
         for sequence, (movement_type, sent_from, sent_to, sent_by, received_by, contents, acknowledged) in enumerate(movement_specs, start=1):
             CaseMovement.objects.update_or_create(
@@ -145,20 +149,23 @@ class Command(BaseCommand):
                     'received_at': record['updated_at'].replace(hour=9 + sequence) if acknowledged else None,
                     'declared_contents': contents,
                     'receipt_acknowledged': acknowledged,
-                    'note': 'DEMO movement event for complaint-routing demonstration.',
+                    'note': 'Routine movement event recorded for complaint-routing purposes.',
                 },
             )
 
     def _upsert_assignment(self, case, record, profiles):
         if not record['rsa']:
             return
-        CaseAssignment.objects.update_or_create(
+        existing = case.assignments.filter(assignee=record['rsa'], ended_at__isnull=True).first()
+        if existing:
+            existing.reason = 'Complaint-context review allocation'
+            existing.priority = 3
+            existing.save(update_fields=['reason', 'priority'])
+            return
+        CaseAssignment.objects.create(
             case=case,
             assignee=record['rsa'],
-            ended_at__isnull=True,
-            defaults={
-                'assigned_by': self._profile(profiles, 'DEMO-ODPP-003'),
-                'reason': 'DEMO complaint-context review allocation',
-                'priority': 3,
-            },
+            assigned_by=self._profile(profiles, 'ODPP-003'),
+            reason='Complaint-context review allocation',
+            priority=3,
         )
