@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ODPP | Staff Sign-in{% endblock %}
+
+{% block extra_head %}
+<style>
+  body { min-height: 100vh; background: #f4f6fa; }
+  .signin-layout { display: grid; grid-template-columns: minmax(360px, .86fr) minmax(500px, 1.14fr); min-height: 100vh; }
+  .signin-intro { display: flex; flex-direction: column; justify-content: space-between; padding: 42px clamp(32px, 5vw, 76px); border-right: 1px solid #163a7d; border-bottom: 6px solid var(--crest-gold); background: var(--odpp-blue); color: var(--white); }
+  .signin-identity { display: flex; align-items: center; gap: 15px; }
+  .signin-crest { width: 70px; height: 70px; object-fit: contain; }
+  .signin-republic { margin: 0 0 5px; color: var(--crest-gold); font-size: .66rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .signin-office { margin: 0; color: var(--white); font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.35rem; font-weight: 600; line-height: 1; }
+  .signin-product { margin: 46px 0 auto; padding: 28px 0; border-top: 1px solid rgb(255 255 255 / 25%); border-bottom: 1px solid rgb(255 255 255 / 25%); }
+  .signin-product > p:first-child { margin: 0 0 10px; color: #dbe6fa; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .signin-intro h1 { max-width: 420px; margin: 0; color: var(--white); font-size: clamp(2.3rem, 3.6vw, 3.5rem); line-height: 1.06; }
+  .signin-copy { max-width: 430px; margin: 22px 0 0; color: #dbe6fa; font-size: .86rem; }
+  .signin-terms { margin-top: 42px; color: #dbe6fa; font-size: .74rem; }
+  .signin-panel { display: grid; place-items: center; padding: 38px clamp(30px, 6vw, 92px); background: var(--white); }
+  .signin-form-wrap { width: min(100%, 350px); }
+  .signin-form-wrap::before { display: block; width: 34px; height: 4px; margin-bottom: 17px; background: var(--crest-gold); content: ""; }
+  .signin-form-wrap h2 { font-size: 1.7rem; }
+  .signin-form-wrap > p { margin: 5px 0 22px; color: var(--muted); font-size: .86rem; }
+  .signin-form { display: grid; gap: 14px; }
+  .signin-form .odpp-field input { min-height: 40px; }
+  .signin-form .odpp-button { width: 100%; min-height: 40px; margin-top: 2px; }
+  .signin-error { margin: 0; color: #a8171d; font-size: .8rem; font-weight: 700; }
+  .signin-help { margin: 22px 0 0; padding-top: 17px; border-top: 1px solid var(--line); color: var(--muted); font-size: .74rem; }
+  @media (max-width: 760px) { .signin-layout { grid-template-columns: 1fr; } .signin-intro { min-height: auto; padding: 27px 28px; border-right: 0; } .signin-crest { width: 53px; height: 53px; } .signin-office { font-size: 1.15rem; } .signin-product { margin: 28px 0 0; padding: 20px 0; } .signin-intro h1 { font-size: 2.5rem; } .signin-copy { font-size: .84rem; } .signin-terms { display: none; } .signin-panel { align-items: start; padding: 40px 28px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="signin-layout">
+  <section class="signin-intro" aria-labelledby="product-title">
+    <div>
+      <div class="signin-identity">
+        <img class="signin-crest" src="{% static 'odpp-crest.png' %}" alt="Office of the Director of Public Prosecutions coat of arms">
+        <div><p class="signin-republic">Republic of Uganda</p><p class="signin-office">Office of the Director<br>of Public Prosecutions</p></div>
+      </div>
+      <div class="signin-product">
+        <p>Inspections &amp; Quality Assurance</p>
+        <h1 id="product-title">Complaints<br>Management<br>System</h1>
+        <p class="signin-copy">A controlled workspace for receiving, reviewing, escalating, and resolving service complaints.</p>
+      </div>
+    </div>
+    <div class="signin-terms">Article 120, Constitution of the Republic of Uganda</div>
+  </section>
+  <section class="signin-panel" aria-labelledby="signin-title">
+    <div class="signin-form-wrap">
+      <h2 id="signin-title">Staff sign-in</h2>
+      <p>Use your assigned staff account to enter your permitted workspace.</p>
+      <form class="signin-form" method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<p class="signin-error" role="alert">{{ form.non_field_errors|striptags }}</p>{% endif %}
+        <div class="odpp-field">
+          <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+          {{ form.username }}
+          {% for error in form.username.errors %}<span class="signin-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="odpp-field">
+          <label for="{{ form.password.id_for_label }}">Password</label>
+          {{ form.password }}
+          {% for error in form.password.errors %}<span class="signin-error">{{ error }}</span>{% endfor %}
+        </div>
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <button class="odpp-button" type="submit">Sign in securely</button>
+      </form>
+      <p class="signin-help">Access is restricted to authorised ODPP and approved partner personnel. Contact your system administrator for account assistance.</p>
+    </div>
+  </section>
+</main>
+{% endblock %}

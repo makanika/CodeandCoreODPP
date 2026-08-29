@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}ODPP | Track a complaint{% endblock %}
+{% block content %}
+<main class="odpp-page"><div class="odpp-container" style="max-width: 680px"><p class="odpp-eyebrow">Public complaint tracker</p><h1>Check your complaint</h1><p class="odpp-muted">Enter the reference and six-digit PIN from your receipt.</p><form method="post" class="odpp-card" style="margin-top: 22px"><div class="odpp-card__body" style="display: grid; gap: 16px">{% csrf_token %}{% for field in form %}<div class="odpp-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<span class="signin-error">{{ error }}</span>{% endfor %}</div>{% endfor %}<button class="odpp-button" type="submit">Check status</button></div></form>{% if complaint %}<section class="odpp-card" style="margin-top: 18px"><div class="odpp-card__body"><p class="odpp-eyebrow">Current status</p><h2>{{ complaint.public_status }}</h2><p class="odpp-muted">Last meaningful update: {{ complaint.last_meaningful_update_at|date:'j F Y, H:i' }}</p></div></section>{% endif %}</div></main>
+{% endblock %}
