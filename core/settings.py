@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',
     'accounts',
     'cases',
     'complaints',
@@ -144,6 +145,22 @@ STORAGES = {
 }
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Uploaded documents (complaint/case evidence) persist to S3 via the Bucketeer add-on
+# when provisioned; otherwise they fall back to local disk for development. The bucket
+# is private — file links are short-lived signed URLs, not public objects, matching the
+# access-controlled visibility the Document model already declares.
+AWS_STORAGE_BUCKET_NAME = env('BUCKETEER_BUCKET_NAME', default='')
+if AWS_STORAGE_BUCKET_NAME:
+    AWS_ACCESS_KEY_ID = env('BUCKETEER_AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = env('BUCKETEER_AWS_SECRET_ACCESS_KEY')
+    AWS_S3_REGION_NAME = env('BUCKETEER_AWS_REGION')
+    AWS_DEFAULT_ACL = None
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_QUERYSTRING_AUTH = True
+    AWS_QUERYSTRING_EXPIRE = 3600
+    AWS_S3_FILE_OVERWRITE = False
+    STORAGES["default"] = {"BACKEND": "storages.backends.s3.S3Storage"}
 
 
 # Email
