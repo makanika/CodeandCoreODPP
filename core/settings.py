@@ -25,7 +25,7 @@ environ.Env.read_env(BASE_DIR / 'core' / '.env')
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 SECRET_KEY = env('DJANGO_SECRET_KEY')
-DEBUG = env('DJANGO_DEBUG')
+DEBUG = env.bool('DJANGO_DEBUG', default=False)
 ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
 
 
