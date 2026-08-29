@@ -13,10 +13,12 @@ from cases.models import CaseReference
 from cases.services import add_case_comment, advance_case_stage, assign_case, move_case, visible_cases_for
 from complaints.forms import ComplaintAssignmentForm, ComplaintCommentForm
 from complaints.models import Complaint, ComplaintEvent
-from complaints.services import add_complaint_comment, assign_complaint, visible_complaints_for
+from complaints.services import add_complaint_comment, assign_complaint, handoff_type_a, visible_complaints_for
+from conduct.forms import TypeAEscalationForm
+from conduct.services import receive_type_a_handoff
 from documents.models import Document
 from staff.models import StaffProfile
-from staff.permissions import is_director
+from staff.permissions import can_access_conduct, is_director
 
 
 class OperationalDashboardView(LoginRequiredMixin, TemplateView):
@@ -47,6 +49,7 @@ class OperationalDashboardView(LoginRequiredMixin, TemplateView):
 			profile=profile,
 			role_workspace=self._workspace_label(profile.role),
 			is_director=is_director(profile),
+			can_access_conduct=can_access_conduct(profile),
 			now=now,
 			complaint_count=active_complaints.count(),
 			visible_complaint_count=complaints.count(),
@@ -125,17 +128,46 @@ class ComplaintDetailView(LoginRequiredMixin, DetailView):
 		profile = StaffProfile.objects.get(account=self.request.user)
 		context['profile'] = profile
 		context['is_director'] = is_director(profile)
+		context['can_access_conduct'] = can_access_conduct(profile)
 		context['assignment_form'] = kwargs.get('assignment_form') or ComplaintAssignmentForm(
 			requesting_profile=profile,
 			initial={'assignee': context['complaint'].assigned_to_id},
 		)
 		context['comment_form'] = kwargs.get('comment_form') or ComplaintCommentForm()
+		context['type_a_form'] = kwargs.get('type_a_form') or TypeAEscalationForm()
 		return context
 
 	def post(self, request, *args, **kwargs):
 		self.object = self.get_object()
 		profile = StaffProfile.objects.get(account=request.user)
 		action = request.POST.get('action')
+		if action == 'escalate_type_a':
+			if not is_director(profile):
+				messages.error(request, 'Only directorate-level staff can escalate a complaint to the sealed conduct workflow.')
+				return redirect('complaint-detail', pk=self.object.pk)
+			if self.object.classification == Complaint.Classification.TYPE_A_HANDOFF:
+				messages.error(request, 'This complaint has already been transferred to the conduct workflow.')
+				return redirect('complaint-detail', pk=self.object.pk)
+			form = TypeAEscalationForm(request.POST)
+			if form.is_valid():
+				conduct_complaint = receive_type_a_handoff(
+					subject_officer=form.cleaned_data['subject_officer'],
+					complainant_name=self.object.complainant_name,
+					complainant_nin=self.object.complainant_nin,
+					complainant_phone=self.object.complainant_phone,
+					complainant_email=self.object.complainant_email,
+					allegation_category=form.cleaned_data['allegation_category'],
+					severity=form.cleaned_data['severity'],
+					narrative=form.cleaned_data['narrative'],
+					actor=profile,
+					source_complaint_reference=self.object.reference,
+				)
+				handoff_type_a(self.object, actor=profile, conduct_reference=conduct_complaint.reference)
+				messages.success(request, f'Complaint {conduct_complaint.reference} escalated to the sealed conduct workflow. This complaint record has been redacted.')
+				if can_access_conduct(profile):
+					return redirect('conduct-detail', pk=conduct_complaint.pk)
+				return redirect('dashboard')
+			return self.render_to_response(self.get_context_data(type_a_form=form))
 		if action == 'assign':
 			if not is_director(profile):
 				messages.error(request, 'Only directorate-level staff can reassign a complaint.')
@@ -195,6 +227,7 @@ class CaseDetailView(LoginRequiredMixin, DetailView):
 		case = context['case']
 		context['profile'] = profile
 		context['is_director'] = is_director(profile)
+		context['can_access_conduct'] = can_access_conduct(profile)
 		context['assignment_form'] = kwargs.get('assignment_form') or CaseAssignmentForm(
 			requesting_profile=profile,
 			initial={'assignee': case.allocated_to_id},
@@ -302,6 +335,7 @@ class StaffDirectoryView(LoginRequiredMixin, DirectorRequiredMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		context['profile'] = StaffProfile.objects.get(account=self.request.user)
 		context['is_director'] = True
+		context['can_access_conduct'] = can_access_conduct(context['profile'])
 		active_statuses = [
 			Complaint.Status.RECEIVED,
 			Complaint.Status.OPEN_RSA,
@@ -333,6 +367,7 @@ class StaffWorkloadView(LoginRequiredMixin, DirectorRequiredMixin, DetailView):
 		staff_member = context['staff_member']
 		context['profile'] = StaffProfile.objects.get(account=self.request.user)
 		context['is_director'] = True
+		context['can_access_conduct'] = can_access_conduct(context['profile'])
 		active_statuses = [
 			Complaint.Status.RECEIVED,
 			Complaint.Status.OPEN_RSA,

@@ -26,7 +26,10 @@ pip-wheel-metadata/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+conduct.sqlite3
+conduct.sqlite3-journal
 media/
+conduct_media/
 staticfiles/
 htmlcov/
 .coverage

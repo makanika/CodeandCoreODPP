@@ -11,10 +11,25 @@ APEX_OVERSIGHT_ROLES = {
     StaffProfile.Role.DEPUTY_DPP,
 }
 
+CONDUCT_ROLES = {
+    StaffProfile.Role.INTERNAL_AFFAIRS,
+    StaffProfile.Role.DPP,
+    StaffProfile.Role.DEPUTY_DPP,
+}
+
 
 def is_director(profile):
     """Whether this profile holds directorate-level authority to assign, move, and direct work across offices."""
     return profile.role in DIRECTOR_ROLES
+
+
+def can_access_conduct(profile):
+    """Whether this profile may see sealed Type A conduct material at all.
+
+    Everyone else must get an outright 403, not a filtered empty list: conduct
+    material must be absent from views and exports, not merely hidden.
+    """
+    return profile.role in CONDUCT_ROLES
 
 
 def assignable_staff(requesting_profile):

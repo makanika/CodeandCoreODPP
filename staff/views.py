@@ -9,7 +9,7 @@ from cases.models import CaseReference
 from complaints.models import Complaint
 
 from .models import StaffProfile
-from .permissions import is_director
+from .permissions import can_access_conduct, is_director
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
@@ -37,6 +37,7 @@ class MyStaffProfileView(LoginRequiredMixin, DetailView):
         )
         context['primary_posting'] = primary_posting
         context['is_director'] = is_director(profile)
+        context['can_access_conduct'] = can_access_conduct(profile)
         context['direct_reportees'] = StaffProfile.objects.filter(
             postings__reports_to=profile,
             postings__is_primary=True,

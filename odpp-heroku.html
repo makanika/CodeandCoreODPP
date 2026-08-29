@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ODPP | Deploying to Heroku</title>
+<style>
+  body{font-family:-apple-system,Segoe UI,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.55;color:#1a1a1a}
+  h1{font-size:1.5rem} h2{font-size:1.1rem;margin-top:2em;border-bottom:1px solid #ddd;padding-bottom:.3em}
+  code,pre{background:#f4f6fa;border-radius:4px}
+  code{padding:.15em .4em;font-size:.9em}
+  pre{padding:12px 14px;overflow-x:auto;font-size:.85em}
+  .note{background:#fff9dc;border-left:4px solid #ffd200;padding:10px 14px;margin:1em 0}
+  .warn{background:#fdeced;border-left:4px solid #d8232a;padding:10px 14px;margin:1em 0}
+</style>
+</head>
+<body>
+<h1>Deploying the ODPP Complaints Console to Heroku</h1>
+<p>This app isn't Heroku-ready yet — no <code>Procfile</code>, no <code>gunicorn</code>/<code>dj-database-url</code> in <code>requirements.txt</code>, and Whitenoise is installed but not wired into <code>settings.py</code>. Steps below cover what's needed.</p>
+
+<h2>1. Add missing dependencies</h2>
+<pre>pip install gunicorn dj-database-url
+pip freeze &gt; requirements.txt   # or add the two lines by hand, keep it UTF-8</pre>
+
+<h2>2. Add a Procfile</h2>
+<pre>release: python manage.py migrate
+web: gunicorn core.wsgi</pre>
+
+<h2>3. Wire Whitenoise + DATABASE_URL into settings.py</h2>
+<pre>MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',   # right after SecurityMiddleware
+    ...
+]
+STORAGES = {"staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"}}
+
+import dj_database_url
+DATABASES['default'] = dj_database_url.config(default=env('DATABASE_URL'))</pre>
+
+<div class="warn"><strong>The <code>conduct</code> database won't survive on Heroku.</strong> It's SQLite on local disk — Heroku's filesystem is ephemeral and wiped on every dyno restart/deploy. Provision a second Postgres add-on (<code>heroku addons:create heroku-postgresql:mini --as CONDUCT</code>) and point <code>DATABASES['conduct']</code> at <code>env('CONDUCT_DATABASE_URL')</code> the same way. Do this before real conduct data exists.</div>
+
+<h2>4. Create the Heroku app and connect GitHub</h2>
+<pre>heroku create odpp-complaints
+heroku addons:create heroku-postgresql:mini
+heroku config:set DJANGO_SECRET_KEY=... DJANGO_DEBUG=False DJANGO_ALLOWED_HOSTS=odpp-complaints.herokuapp.com</pre>
+<p>Then in the Heroku dashboard: <strong>Deploy tab → Deployment method → GitHub</strong> → connect your account → search this repo → connect. Enable <em>Automatic Deploys</em> from <code>main</code>, or use <em>Manual Deploy</em> per push.</p>
+
+<h2>5. First release</h2>
+<pre>git push heroku main
+heroku run python manage.py migrate
+heroku run python manage.py createsuperuser</pre>
+
+<div class="note">Django 5.2 needs PostgreSQL 14+ — Heroku's Postgres add-ons default to a current version, so this is fine unless you pin an old plan.</div>
+
+<h2>Don't forget</h2>
+<ul>
+<li><code>DEBUG=False</code> in production — seed commands refuse to run otherwise, which is correct.</li>
+<li>Set a real <code>DJANGO_SECRET_KEY</code>, not the one in <code>core/.env</code>.</li>
+<li><code>MEDIA_ROOT</code> (uploaded documents) is also on ephemeral disk — needs S3 or similar before real documents are uploaded, same issue as the conduct DB.</li>
+</ul>
+</body>
+</html>
