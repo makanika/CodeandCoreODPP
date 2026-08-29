@@ -1,0 +1,57 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{% block meta_description %}ODPP Case Pipeline and Complaints Console{% endblock %}">
+  <title>{% block title %}ODPP Case Pipeline &amp; Complaints Console{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'brand/odpp.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header>
+    <div class="odpp-brandbar">
+      <div class="odpp-container odpp-brandbar__inner">
+        <img class="odpp-brandbar__crest" src="{% static 'brand/odpp-crest.png' %}" alt="Office of the Director of Public Prosecutions coat of arms">
+        <div>
+          <p class="odpp-eyebrow">Republic of Uganda</p>
+          <h1>Office of the Director of Public Prosecutions</h1>
+          <p class="odpp-brandbar__subtitle">Case Pipeline &amp; Complaints Console</p>
+        </div>
+      </div>
+    </div>
+    <div class="odpp-utility">
+      <div class="odpp-container odpp-utility__inner">
+        <span>Article 120, Constitution of Uganda</span>
+        <span>{% block utility_scope %}Authenticated ODPP service{% endblock %}</span>
+      </div>
+    </div>
+    {% if request.user.is_authenticated %}
+      <nav class="odpp-nav" aria-label="Primary navigation">
+        <div class="odpp-container odpp-nav__inner">
+          <a href="{% url 'dashboard' %}" {% if active_nav == 'dashboard' %}aria-current="page"{% endif %}>Dashboard</a>
+          {% if permissions.can_view_pipeline %}<a href="{% url 'pipeline:list' %}" {% if active_nav == 'pipeline' %}aria-current="page"{% endif %}>Pipeline</a>{% endif %}
+          {% if permissions.can_view_complaints %}<a href="{% url 'complaints:desk' %}" {% if active_nav == 'complaints' %}aria-current="page"{% endif %}>Complaints</a>{% endif %}
+          {% if permissions.can_view_conduct %}<a href="{% url 'conduct:list' %}" {% if active_nav == 'conduct' %}aria-current="page"{% endif %}>Conduct</a>{% endif %}
+          {% if permissions.can_view_insight %}<a href="{% url 'insight:latency' %}" {% if active_nav == 'insight' %}aria-current="page"{% endif %}>Insight</a>{% endif %}
+        </div>
+      </nav>
+    {% endif %}
+  </header>
+
+  <main class="odpp-page">
+    <div class="odpp-container">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="odpp-alert{% if message.tags %} odpp-alert--{{ message.tags }}{% endif %}" role="status">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</body>
+</html>

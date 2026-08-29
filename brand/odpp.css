@@ -1,0 +1,167 @@
+:root {
+  --odpp-blue: #1e4699;
+  --deep-blue: #12306b;
+  --blue-tint: #eaf0fa;
+  --crest-gold: #ffd200;
+  --crest-red: #d8232a;
+  --ink: #1a1a1a;
+  --muted: #5d6675;
+  --line: #b9cae4;
+  --white: #ffffff;
+  --sanctioned: #16803b;
+  --dfi: #b36b00;
+  --closed: #586273;
+  --breach: #d8232a;
+  --perusal: #1e4699;
+  --focus-ring: 0 0 0 3px rgb(255 210 0 / 62%);
+  --shadow-subtle: 0 3px 10px rgb(18 48 107 / 7%);
+  --radius: 4px;
+  --content-width: 1080px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--white);
+  color: var(--ink);
+  font-family: "Nunito", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button, input, select, textarea { font: inherit; }
+
+a { color: var(--odpp-blue); text-underline-offset: 0.16em; }
+a:hover { color: var(--deep-blue); }
+
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.odpp-container { width: min(var(--content-width), calc(100% - 40px)); margin-inline: auto; }
+.odpp-page { padding-block: 32px; }
+.odpp-page__header { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+
+.odpp-display, h1, h2, h3 {
+  color: var(--deep-blue);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+h1 { margin: 0; font-size: clamp(1.55rem, 2.4vw, 2.12rem); }
+h2 { margin: 0; font-size: clamp(1.34rem, 1.8vw, 1.68rem); }
+h3 { margin: 0; font-size: 1.08rem; }
+
+.odpp-eyebrow {
+  margin: 0 0 8px;
+  color: var(--odpp-blue);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.odpp-muted { color: var(--muted); }
+.odpp-reference { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; }
+
+.odpp-utility {
+  min-height: 42px;
+  background: var(--deep-blue);
+  color: var(--white);
+}
+
+.odpp-utility__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 42px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.odpp-brandbar {
+  background: var(--odpp-blue);
+  color: var(--white);
+}
+
+.odpp-brandbar__inner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 112px;
+}
+
+.odpp-brandbar__crest { width: 66px; height: 66px; object-fit: contain; }
+.odpp-brandbar .odpp-eyebrow { color: var(--crest-gold); margin-bottom: 5px; }
+.odpp-brandbar h1 { color: var(--white); }
+.odpp-brandbar__subtitle { margin: 6px 0 0; color: #dbe6fa; font-size: 0.8rem; }
+
+.odpp-nav {
+  border-bottom: 1px solid var(--line);
+  background: var(--white);
+}
+
+.odpp-nav__inner { display: flex; align-items: center; gap: 4px; min-height: 44px; overflow-x: auto; }
+.odpp-nav a { padding: 10px 12px; color: var(--deep-blue); font-size: 0.78rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.odpp-nav a[aria-current="page"] { border-bottom: 3px solid var(--crest-gold); background: var(--blue-tint); }
+
+.odpp-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 1px solid var(--odpp-blue);
+  border-radius: var(--radius);
+  background: var(--odpp-blue);
+  color: var(--white);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.odpp-button:hover { border-color: var(--deep-blue); background: var(--deep-blue); color: var(--white); }
+.odpp-button--secondary { background: var(--white); color: var(--odpp-blue); }
+.odpp-button--danger { border-color: var(--crest-red); background: var(--crest-red); }
+
+.odpp-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); box-shadow: var(--shadow-subtle); }
+.odpp-card__body { padding: 17px; }
+.odpp-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+.odpp-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+.odpp-table th { padding: 10px 13px; background: var(--deep-blue); color: var(--white); text-align: left; font-size: 0.69rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.odpp-table td { padding: 11px 13px; border-top: 1px solid var(--line); vertical-align: top; }
+.odpp-table tr:nth-child(even) td { background: #f7f9fc; }
+
+.odpp-badge { display: inline-flex; align-items: center; min-height: 23px; padding: 3px 7px; border-radius: 999px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.odpp-badge--sanctioned { background: #dff3e6; color: #0d5e2a; }
+.odpp-badge--dfi { background: #fff0d6; color: #7d4900; }
+.odpp-badge--closed { background: #e9edf2; color: #3d4857; }
+.odpp-badge--breach { background: #fde4e5; color: #a8171d; }
+.odpp-badge--perusal { background: var(--blue-tint); color: var(--deep-blue); }
+.odpp-badge--conduct { background: #fde4e5; color: var(--crest-red); }
+
+.odpp-alert { display: flex; gap: 10px; padding: 12px 14px; border-left: 4px solid var(--odpp-blue); background: var(--blue-tint); color: #243c6d; font-size: 0.84rem; }
+.odpp-alert--warning { border-left-color: var(--crest-gold); background: #fff9dc; color: #644e00; }
+.odpp-alert--danger { border-left-color: var(--crest-red); background: #fdeced; color: #85191e; }
+
+.odpp-field { display: grid; gap: 5px; }
+.odpp-field label { color: var(--deep-blue); font-size: 0.78rem; font-weight: 700; }
+.odpp-field input, .odpp-field select, .odpp-field textarea {
+  width: 100%; min-height: 36px; padding: 7px 9px; border: 1px solid #9eb3d3; border-radius: var(--radius); background: var(--white); color: var(--ink);
+}
+.odpp-field textarea { min-height: 100px; resize: vertical; }
+.odpp-field input:focus, .odpp-field select:focus, .odpp-field textarea:focus { outline: none; border-color: var(--odpp-blue); box-shadow: var(--focus-ring); }
+
+@media (max-width: 640px) {
+  .odpp-container { width: min(100% - 28px, var(--content-width)); }
+  .odpp-page { padding-block: 24px; }
+  .odpp-page__header { align-items: start; flex-direction: column; gap: 8px; }
+  .odpp-brandbar__inner { min-height: 92px; gap: 12px; }
+  .odpp-brandbar__crest { width: 52px; height: 52px; }
+  .odpp-utility__inner { padding-block: 8px; align-items: start; flex-direction: column; }
+}

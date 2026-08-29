@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ODPP brand and process reference for the Case Pipeline and Complaints Console.">
+  <title>ODPP | Brand &amp; Process Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --odpp-blue: #1e4699;
+      --deep-blue: #12306b;
+      --blue-tint: #eaf0fa;
+      --crest-gold: #ffd200;
+      --crest-red: #d8232a;
+      --ink: #1a1a1a;
+      --muted: #5d6675;
+      --line: #b9cae4;
+      --paper: #f8fafd;
+      --white: #ffffff;
+      --sanctioned: #16803b;
+      --dfi: #b36b00;
+      --closed: #586273;
+      --breach: #d8232a;
+      --perusal: #1e4699;
+      --shadow: 0 3px 10px rgb(18 48 107 / 7%);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Nunito", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      background: var(--white);
+    }
+
+    header { display: flex; flex-direction: column; }
+    .topbar { background: var(--deep-blue); color: var(--white); }
+    .topbar { order: 2; }
+    .topbar-inner, .container { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar-inner {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .utility { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+    .utility span { display: inline-flex; align-items: center; gap: 6px; }
+    .utility i { width: 14px; height: 14px; color: var(--crest-gold); }
+
+    .masthead { order: 1; background: var(--odpp-blue); color: var(--white); }
+    .masthead-inner { width: min(980px, calc(100% - 40px)); min-height: 222px; margin: 0 auto; display: grid; grid-template-columns: 104px minmax(0, 1fr); align-content: center; align-items: center; gap: 19px; }
+    .crest { width: 94px; height: 94px; object-fit: contain; flex: 0 0 auto; }
+    .republic { margin: 0 0 7px; color: var(--crest-gold); font-size: .66rem; font-weight: 700; letter-spacing: .14em; }
+    h1, h2, h3, .display { font-family: "Cormorant Garamond", Georgia, serif; color: var(--deep-blue); line-height: 1.08; }
+    h1 { margin: 0; max-width: 650px; color: var(--white); font-size: clamp(1.55rem, 2.4vw, 2.12rem); font-weight: 600; }
+    .subtitle { max-width: 590px; margin: 7px 0 0; color: #dbe6fa; font-size: .78rem; font-weight: 400; }
+
+    .section { padding: 38px 0; background: var(--white); }
+    .section-blue { background: var(--deep-blue); color: var(--white); background-image: linear-gradient(90deg, rgb(255 255 255 / 5%) 1px, transparent 1px), linear-gradient(rgb(255 255 255 / 5%) 1px, transparent 1px); background-size: 28px 28px; }
+    .section-blue h2, .section-blue h3 { color: var(--white); }
+    .section-tint { background: var(--white); }
+    .section-header { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 8px; color: var(--odpp-blue); font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .section-blue .eyebrow { color: var(--crest-gold); }
+    h2 { margin: 0; font-size: clamp(1.34rem, 1.8vw, 1.68rem); }
+    h3 { margin: 0; font-size: 1.08rem; }
+    .section-note { max-width: 410px; margin: 0; color: var(--muted); font-size: .8rem; }
+    .section-blue .section-note { color: #dce7fb; }
+
+    .identity-grid { display: grid; grid-template-columns: 1.4fr .9fr; gap: 18px; }
+    .statement { margin: 0; max-width: 690px; color: var(--deep-blue); font-family: "Cormorant Garamond", Georgia, serif; font-size: clamp(1.4rem, 2.2vw, 1.85rem); line-height: 1.2; }
+    .identity-copy { margin: 16px 0 0; max-width: 700px; color: #3f4e68; font-size: .9rem; }
+    .identity-panel { padding: 20px; background: var(--deep-blue); color: var(--white); border-top: 4px solid var(--crest-gold); box-shadow: var(--shadow); }
+    .identity-panel p { margin: 0; color: #e0e9fa; }
+    .leader { margin-top: 16px; display: grid; gap: 1px; }
+    .leader strong { color: var(--crest-gold); font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.22rem; line-height: 1; }
+    .leader span { font-size: .76rem; font-weight: 600; }
+
+    .principles { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 20px; border: 1px solid var(--line); background: var(--white); }
+    .principle { padding: 15px 17px; border-right: 1px solid var(--line); }
+    .principle:last-child { border-right: 0; }
+    .principle-label { display: block; color: var(--crest-red); font-size: .72rem; font-weight: 700; letter-spacing: .1em; }
+    .principle strong { display: block; margin-top: 4px; font-family: "Cormorant Garamond", Georgia, serif; color: var(--deep-blue); font-size: 1.2rem; line-height: 1.1; }
+
+    .palette { display: grid; grid-template-columns: repeat(6, 1fr); border: 1px solid #315997; }
+    .swatch { min-height: 138px; padding: 14px; display: flex; flex-direction: column; justify-content: end; }
+    .swatch strong { font-size: .88rem; letter-spacing: .03em; }
+    .swatch span { margin-top: 3px; font-size: .75rem; font-weight: 600; }
+    strong { font-weight: 600; }
+    .blue { background: var(--odpp-blue); color: white; } .deep { background: var(--deep-blue); color: white; } .tint { background: var(--blue-tint); color: var(--deep-blue); } .gold { background: var(--crest-gold); color: var(--ink); } .red { background: var(--crest-red); color: white; } .ink { background: var(--ink); color: white; }
+    .type-samples { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+    .type-card { padding: 17px; border: 1px solid rgb(255 255 255 / 28%); background: rgb(255 255 255 / 7%); font-size: .82rem; }
+    .sample-display { margin: 7px 0 14px; color: var(--crest-gold); font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.5rem; line-height: 1; }
+    .reference-sample { font-weight: 600; letter-spacing: .04em; }
+
+    .regional-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; }
+    .table-wrap { overflow-x: auto; background: var(--white); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+    th { padding: 10px 13px; background: var(--deep-blue); color: white; text-align: left; font-size: .69rem; letter-spacing: .06em; text-transform: uppercase; }
+    td { padding: 11px 13px; vertical-align: top; border-top: 1px solid var(--line); }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    .contact-card { padding: 19px; background: var(--white); border-left: 4px solid var(--crest-gold); box-shadow: var(--shadow); }
+    .contact-line { display: flex; gap: 10px; margin: 11px 0; color: #36445c; }
+    .contact-line i { flex: 0 0 auto; width: 19px; color: var(--odpp-blue); }
+    .small-print { color: var(--muted); font-size: .8rem; }
+
+    .chain { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+    .phase { position: relative; min-height: 245px; padding: 16px; background: var(--white); border: 1px solid var(--line); border-right: 0; }
+    .phase:last-child { border-right: 1px solid var(--line); }
+    .phase-num { color: var(--crest-red); font-size: .77rem; font-weight: 700; letter-spacing: .1em; }
+    .phase h3 { margin: 7px 0 12px; font-size: 1.08rem; }
+    .phase p { margin: 0; color: #526078; font-size: .8rem; }
+    .record-list { margin: 12px 0 0; padding: 0; list-style: none; }
+    .record-list li { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); color: var(--deep-blue); font-size: .78rem; font-weight: 600; }
+    .record-list b { color: var(--crest-red); font-weight: 700; }
+
+    .reference-rail { margin: 20px 0 0; padding: 14px 17px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--deep-blue); color: white; font-weight: 700; }
+    .reference-rail i { width: 18px; color: var(--crest-gold); }
+    .reference-rail code { color: var(--crest-gold); font-family: "Nunito", sans-serif; font-size: .88rem; letter-spacing: .03em; }
+    .rail-arrow { color: #a9c3f6; }
+
+    .complaint-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .taxonomy { padding: 21px; border-top: 5px solid var(--crest-red); background: var(--white); box-shadow: var(--shadow); }
+    .taxonomy.process { border-top-color: var(--odpp-blue); }
+    .type-mark { display: inline-block; padding: 4px 8px; background: var(--crest-red); color: white; font-size: .72rem; font-weight: 700; letter-spacing: .08em; }
+    .process .type-mark { background: var(--odpp-blue); }
+    .taxonomy h3 { margin: 14px 0 7px; font-size: 1.35rem; }
+    .taxonomy > p { margin: 0; color: var(--muted); font-size: .88rem; }
+    .facts { margin: 15px 0 0; display: grid; grid-template-columns: 78px 1fr; gap: 7px 12px; font-size: .76rem; }
+    .facts dt { color: var(--deep-blue); font-weight: 700; }
+    .facts dd { margin: 0; color: #46536a; }
+
+    .schema-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .schema-card { padding: 17px; border: 1px solid rgb(255 255 255 / 25%); border-left: 4px solid var(--crest-gold); background: rgb(255 255 255 / 6%); }
+    .schema-card h3 { font-size: 1.18rem; }
+    .schema-card p { margin: 8px 0 0; color: #d9e5fa; font-size: .89rem; }
+    .schema-card code { color: var(--crest-gold); font-family: "Nunito", sans-serif; font-size: .81rem; font-weight: 600; }
+
+    .status-row { display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 20px; }
+    .status { padding: 11px; min-height: 64px; display: flex; align-items: end; color: white; font-size: .7rem; font-weight: 700; letter-spacing: .04em; }
+    .status.sanctioned { background: var(--sanctioned); } .status.dfi { background: var(--dfi); } .status.closed { background: var(--closed); } .status.breach { background: var(--breach); } .status.perusal { background: var(--perusal); }
+
+    footer { padding: 22px 0; background: var(--ink); color: #dce3ef; font-size: .75rem; }
+    .footer-inner { width: min(1180px, calc(100% - 40px)); margin: 0 auto; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    footer strong { color: var(--crest-gold); }
+
+    @media (max-width: 860px) {
+      .identity-grid, .regional-grid, .complaint-grid, .type-samples { grid-template-columns: 1fr; }
+      .palette { grid-template-columns: repeat(3, 1fr); } .swatch { min-height: 130px; }
+      .chain { grid-template-columns: repeat(2, 1fr); } .phase:nth-child(2) { border-right: 1px solid var(--line); } .phase:nth-child(-n+2) { border-bottom: 0; }
+      .status-row { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .topbar-inner, .masthead-inner { width: min(100% - 28px, 1180px); }
+      .topbar-inner { padding: 10px 0; align-items: flex-start; flex-direction: column; }
+      .masthead-inner { min-height: 154px; grid-template-columns: 68px minmax(0, 1fr); gap: 13px; } .crest { width: 58px; height: 58px; }
+      .section { padding: 44px 0; } .container { width: min(100% - 28px, 1180px); }
+      .principles, .schema-grid { grid-template-columns: 1fr; } .principle { border-right: 0; border-bottom: 1px solid var(--line); } .principle:last-child { border-bottom: 0; }
+      .palette { grid-template-columns: repeat(2, 1fr); } .chain { grid-template-columns: 1fr; } .phase, .phase:nth-child(2) { border-right: 1px solid var(--line); border-bottom: 0; } .phase:last-child { border-bottom: 1px solid var(--line); }
+      .status-row { grid-template-columns: 1fr 1fr; } .section-header { align-items: start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <span>ARTICLE 120, CONSTITUTION OF UGANDA</span>
+        <div class="utility">
+          <span><i data-lucide="phone"></i>Toll Free 0800 112 300</span>
+          <span><i data-lucide="clock-3"></i>Mon-Fri 08:00-17:00</span>
+          <span><i data-lucide="globe-2"></i>dpp.go.ug</span>
+        </div>
+      </div>
+    </div>
+    <div class="masthead">
+      <div class="masthead-inner">
+        <img class="crest" src="https://odpp-pack.africangraphyte.dev/uploads/ODPP-ICON.png" alt="ODPP coat of arms">
+        <div>
+          <p class="republic">REPUBLIC OF UGANDA</p>
+          <h1>Office of the Director of Public Prosecutions</h1>
+          <p class="subtitle">Brand &amp; Process Reference | Case Pipeline &amp; Complaints Console</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div><p class="eyebrow">01 - Identity</p><h2>Institutional purpose, made operational</h2></div>
+          <p class="section-note">Source material for the ODPP design system and the Complaints Management System.</p>
+        </div>
+        <div class="identity-grid">
+          <div>
+            <p class="statement">"To manage and prosecute criminal cases in courts of judicature in order to reduce the rate of crime in the country."</p>
+            <p class="identity-copy">Established under Article 120 of the Constitution of the Republic of Uganda, ODPP institutes criminal proceedings in courts with competent jurisdiction, except the court martial. The digital system must respect that public mandate while protecting sensitive case and conduct information.</p>
+          </div>
+          <aside class="identity-panel">
+            <p class="eyebrow">Director</p>
+            <div class="leader"><strong>Mr. Lino Anguzu</strong><span>Assumed office 18 Nov 2025</span></div>
+            <div class="leader"><strong>PROCAMIS</strong><span>Prosecution Case Management Information System</span></div>
+            <div class="leader"><strong>IQA</strong><span>Inspections &amp; Quality Assurance owns complaints workflow</span></div>
+          </aside>
+        </div>
+        <div class="principles">
+          <div class="principle"><span class="principle-label">VISION</span><strong>A Crime Free Society</strong></div>
+          <div class="principle"><span class="principle-label">MISSION</span><strong>Manage and prosecute criminal cases</strong></div>
+          <div class="principle"><span class="principle-label">GOAL</span><strong>Streamline prosecutions and criminal justice</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-blue">
+      <div class="container">
+        <div class="section-header"><div><p class="eyebrow">02 - Colour and typography</p><h2>Colour taken from the ODPP crest</h2></div><p class="section-note">Use these values directly in the Django application. Do not substitute a generic blue or purple dashboard theme.</p></div>
+        <div class="palette">
+          <div class="swatch blue"><strong>ODPP Blue</strong><span>#1E4699 | Primary</span></div>
+          <div class="swatch deep"><strong>Deep Blue</strong><span>#12306B | Headers</span></div>
+          <div class="swatch tint"><strong>Blue Tint</strong><span>#EAF0FA | Surfaces</span></div>
+          <div class="swatch gold"><strong>Crest Gold</strong><span>#FFD200 | Accent</span></div>
+          <div class="swatch red"><strong>Crest Red</strong><span>#D8232A | Alert</span></div>
+          <div class="swatch ink"><strong>Ink</strong><span>#1A1A1A | Text</span></div>
+        </div>
+        <div class="type-samples">
+          <div class="type-card"><p class="eyebrow">Cormorant Garamond 600</p><div class="sample-display">Case Pipeline &amp; Complaints Console</div><p>Use for display headings, case headings, and statements of offence.</p></div>
+          <div class="type-card"><p class="eyebrow">Nunito 400 / 600 / 800</p><div class="reference-sample">SD REF 14/26/08/2026 &nbsp; CRB 412/2026</div><p>Use for controls, tables, case references, navigation, and all operational text. Reference identifiers keep 0.04em tracking.</p></div>
+        </div>
+        <div class="status-row" aria-label="Status colour reference"><div class="status sanctioned">SANCTIONED</div><div class="status dfi">DFI ISSUED</div><div class="status closed">CLOSED / NOLLE</div><div class="status breach">LATENCY BREACH</div><div class="status perusal">UNDER PERUSAL</div></div>
+      </div>
+    </section>
+
+    <section class="section section-tint">
+      <div class="container">
+        <div class="section-header"><div><p class="eyebrow">03 - Jurisdiction and contact</p><h2>Regional chain of command to headquarters</h2></div><p class="section-note">Pilot routing must derive the responsible regional officer from the station on the case.</p></div>
+        <div class="regional-grid">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Region / office</th><th>Regional chain</th><th>Pilot station route</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Nakawa</strong><br>Naguru, Plot 29B</td><td>Regional Officer -> Registry -> RSA -> HQ</td><td>Jinja Road Police Station</td></tr>
+                <tr><td><strong>Masaka</strong><br>Regional ODPP office</td><td>Regional Officer -> Registry -> RSA -> HQ</td><td>Masaka Central Police Station</td></tr>
+                <tr><td><strong>Arua</strong><br>Regional ODPP office</td><td>Regional Officer -> Registry -> RSA -> HQ</td><td>Arua Central Police Station</td></tr>
+                <tr><td><strong>Headquarters</strong><br>JLOS Towers, Naguru</td><td>DPP / Deputy DPP / Directorates</td><td>National oversight and escalation</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <aside class="contact-card">
+            <p class="eyebrow">Public and press</p><h3>ODPP contact layer</h3>
+            <div class="contact-line"><i data-lucide="phone-call"></i><span><strong>Toll Free</strong><br>0800 112 300</span></div>
+            <div class="contact-line"><i data-lucide="clock-3"></i><span><strong>Opening hours</strong><br>Mon-Fri 08:00-17:00</span></div>
+            <div class="contact-line"><i data-lucide="map-pin"></i><span><strong>Head office</strong><br>JLOS Towers, Tower 2, 4th, 5th &amp; 6th Floors<br>Plot 98-102, Katalima Road, Naguru</span></div>
+            <p class="small-print">Published references list legacy and current head-office addresses. Confirm the authoritative print address before release.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-header"><div><p class="eyebrow">04 - The paper chain</p><h2>Police desk to cause list</h2></div><p class="section-note">Twelve paper records across three institutions become a traceable Django custody chain.</p></div>
+        <div class="chain">
+          <article class="phase"><span class="phase-num">PHASE 1</span><h3>Jinja Road Police Station</h3><p>Ingestion and telemetry. The legal event is born at the station.</p><ul class="record-list"><li><b>01</b> Station Diary (SD)</li><li><b>02</b> Crime Report Book (CRB)</li><li><b>03</b> Case File Jacket</li><li><b>04</b> CID Dispatch / File Movement Register</li></ul></article>
+          <article class="phase"><span class="phase-num">PHASE 2</span><h3>ODPP Central Registry</h3><p>Ingestion and indexing. Receipt turns a police file into an ODPP-tracked file.</p><ul class="record-list"><li><b>05</b> Central Inward Register</li><li><b>06</b> File Allocation / Movement Sheet</li></ul></article>
+          <article class="phase"><span class="phase-num">PHASE 3</span><h3>Prosecutorial Perusal</h3><p>A decision must be durable and never overwrite the earlier minute.</p><ul class="record-list"><li><b>07</b> Perusal Minute Sheet</li><li><b>08</b> Outward Dispatch Register</li><li>Sanctioned / DFI / Closed</li></ul></article>
+          <article class="phase"><span class="phase-num">PHASE 4</span><h3>Court Ingestion</h3><p>The court reference binds the case to judicial process and the public cause list.</p><ul class="record-list"><li><b>09</b> Court Criminal Register</li><li><b>10</b> Daily Cause List</li><li>Court order / judgment</li></ul></article>
+        </div>
+        <div class="reference-rail"><i data-lucide="git-branch"></i><code>SD REF 14/26/08/2026</code><span class="rail-arrow">-></span><code>JINJA ROAD CRB 412/2026</code><span class="rail-arrow">-></span><code>DPP/JNJ/412/2026</code><span class="rail-arrow">-></span><code>NAK-00-CR-CO-0512-2026</code></div>
+      </div>
+    </section>
+
+    <section class="section section-tint">
+      <div class="container">
+        <div class="section-header"><div><p class="eyebrow">05 - Complaints layer</p><h2>Dual taxonomy, deliberately separated</h2></div><p class="section-note">A complaint is classified once by the Head of Complaints and then follows a different data and access path.</p></div>
+        <div class="complaint-grid">
+          <article class="taxonomy"><span class="type-mark">TYPE A</span><h3>Officer conduct</h3><p>Complaint against an RSA, IO, or another named officer.</p><dl class="facts"><dt>Record</dt><dd>Confidential Internal Affairs File with IAF reference.</dd><dt>Scope</dt><dd>Corruption, solicitation, extortion, evidence tampering, professional misconduct.</dd><dt>Routing</dt><dd>Isolated disciplinary registry. Internal Affairs / IQA only.</dd><dt>Hard rule</dt><dd>Accused officer has zero read access. Every read is logged.</dd></dl></article>
+          <article class="taxonomy process"><span class="type-mark">TYPE B</span><h3>Process / case delay</h3><p>Complaint about status, custody, delay, or communication.</p><dl class="facts"><dt>Record</dt><dd>Case Latency Inquiry Sheet linked to CRB and ODPP identifiers.</dd><dt>Scope</dt><dd>Lost file, perusal over 14 days, decision not communicated.</dd><dt>Routing</dt><dd>Regional Inspectorate and RSA mandated status audit.</dd><dt>Hard rule</dt><dd>Case link and elapsed time drive automatic alerts and escalation.</dd></dl></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-blue">
+      <div class="container">
+        <div class="section-header"><div><p class="eyebrow">06 - Django system implications</p><h2>Build the visibility that paper cannot provide</h2></div><p class="section-note">The UI mirrors the ledgers, but the data model makes custody, delay, and responsibility auditable.</p></div>
+        <div class="schema-grid">
+          <article class="schema-card"><h3>Canonical case identity</h3><p>One <code>Case</code> object with nullable, uniquely indexed <code>sd_reference</code>, <code>crb_reference</code>, <code>odpp_reference</code>, and <code>court_reference</code>.</p></article>
+          <article class="schema-card"><h3>Custody events</h3><p>Append-only <code>FileMovement</code>: <code>from_location</code>, <code>to_location</code>, <code>courier</code>, <code>dispatched_at</code>, and <code>received_at</code>. Unreceived dispatches signal loss.</p></article>
+          <article class="schema-card"><h3>Perusal decisions</h3><p><code>PerusalMinute</code> choices: <code>SANCTIONED</code>, <code>DFI</code>, <code>CLOSED</code>; with attorney, directive, and register. Never overwrite a decision.</p></article>
+          <article class="schema-card"><h3>Complaint isolation</h3><p>Separate <code>ConductComplaint</code> and <code>ProcessComplaint</code> models. Conduct reads are restricted and audited; process complaints compute latency from registry intake.</p></article>
+          <article class="schema-card"><h3>Jurisdiction routing</h3><p><code>Region -> RSA station -> RSP station</code> hierarchy. Complaint routing derives the responsible regional officer from the case station.</p></article>
+          <article class="schema-card"><h3>Assisted lodging</h3><p>Designated police terminals generate a receipt, hashed PIN, and non-sensitive QR locator. The public can lodge or track a complaint, not browse case details.</p></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner"><span><strong>ODPP Brand &amp; Process Reference</strong> | Source material for Case Pipeline &amp; Complaints Console</span><span>Compiled 26 August 2026 | Verify operational contact and jurisdiction data before production.</span></div>
+  </footer>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

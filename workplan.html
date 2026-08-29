@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ODPP Complaints Management System 18-day proof of concept roadmap.">
+  <title>ODPP | 18-Day Roadmap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --odpp-blue: #1e4699;
+      --deep-blue: #12306b;
+      --blue-tint: #eaf0fa;
+      --crest-gold: #ffd200;
+      --crest-red: #d8232a;
+      --ink: #1a1a1a;
+      --muted: #5d6675;
+      --line: #b9cae4;
+      --paper: #f4f6fa;
+      --white: #fff;
+      --shadow: 0 3px 12px rgb(18 48 107 / 8%);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.45 "Nunito", sans-serif; }
+    button { font: inherit; }
+    button:focus-visible, a:focus-visible { outline: 3px solid var(--crest-gold); outline-offset: 2px; }
+
+    .site-nav { background: var(--deep-blue); border-bottom: 4px solid var(--crest-gold); }
+    .nav-inner { width: min(1120px, calc(100% - 40px)); min-height: 88px; margin: auto; display: flex; align-items: center; gap: 8px 28px; flex-wrap: wrap; padding: 17px 0; }
+    .nav-title { flex: 1 1 100%; margin: 0 0 1px; color: #dce7fb; font-size: .7rem; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
+    .nav-link { border: 0; border-bottom: 2px solid transparent; padding: 5px 0; background: transparent; color: #fff; cursor: pointer; font-size: .76rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .nav-link:hover, .nav-link[aria-current="page"] { border-color: var(--crest-gold); color: var(--crest-gold); }
+
+    .sheet { width: min(1120px, calc(100% - 40px)); margin: 44px auto; border-top: 7px solid var(--odpp-blue); background: var(--white); box-shadow: var(--shadow); }
+    .masthead { display: grid; grid-template-columns: 266px 1fr; gap: 32px; padding: 39px 46px 30px; border-bottom: 1px solid var(--line); }
+    .identity { display: grid; align-content: start; gap: 22px; }
+    .identity-row { display: flex; align-items: center; gap: 12px; }
+    .crest { width: 44px; height: 44px; object-fit: contain; }
+    .kicker { margin: 0; color: var(--odpp-blue); font-size: .7rem; font-weight: 700; letter-spacing: .12em; line-height: 1.55; text-transform: uppercase; }
+    h1, h2, h3 { margin: 0; color: var(--deep-blue); font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; line-height: .98; }
+    h1 { font-size: clamp(2.1rem, 4vw, 4rem); letter-spacing: -.01em; }
+    h1 em { color: var(--odpp-blue); }
+    .intro { margin: 18px 0 0; color: #46536a; font-size: .91rem; }
+    .metric-row { display: grid; grid-template-columns: repeat(4, 1fr); align-self: start; border: 1px solid var(--line); }
+    .metric { min-height: 102px; display: grid; place-content: center; border-right: 1px solid var(--line); text-align: center; }
+    .metric:last-child { border-right: 0; }
+    .metric strong { color: var(--deep-blue); font: 600 2.1rem/.9 "Cormorant Garamond", Georgia, serif; }
+    .metric span { margin-top: 6px; color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+
+    .section { padding: 30px 46px; border-bottom: 1px solid var(--line); }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
+    h2 { font-size: 1.66rem; }
+    .hint { margin: 0; color: var(--muted); font-size: .78rem; }
+    .phase-overview { display: grid; grid-template-columns: 156px 1fr; align-items: center; gap: 25px; }
+    .phase-donut { position: relative; width: 156px; height: 156px; border-radius: 50%; background: conic-gradient(var(--odpp-blue) 0 22.2%, var(--crest-gold) 22.2% 38.9%, var(--deep-blue) 38.9% 55.6%, #2d6cbd 55.6% 83.3%, var(--crest-red) 83.3% 94.4%, #dce6f6 94.4% 100%); }
+    .phase-donut__centre { position: absolute; inset: 40px; display: grid; place-content: center; border-radius: 50%; background: var(--white); text-align: center; }
+    .phase-donut__centre strong { color: var(--deep-blue); font: 600 2.1rem/.9 "Cormorant Garamond", Georgia, serif; }
+    .phase-donut__centre span { margin-top: 4px; color: var(--muted); font-size: .61rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .phase-grid { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); }
+    .phase { min-height: 104px; border: 0; border-right: 1px solid var(--line); padding: 14px; background: var(--white); color: inherit; text-align: left; cursor: pointer; }
+    .phase:nth-child(3n) { border-right: 0; }
+    .phase:nth-child(-n+3) { border-bottom: 1px solid var(--line); }
+    .phase:hover, .phase.is-selected { background: var(--blue-tint); }
+    .phase .day { display: block; color: var(--odpp-blue); font: 600 1.55rem/.9 "Cormorant Garamond", Georgia, serif; }
+    .phase .name { display: block; margin-top: 7px; color: var(--deep-blue); font-size: .79rem; font-weight: 700; }
+    .phase .range { display: block; margin-top: 3px; color: var(--muted); font-size: .71rem; }
+
+    .gate-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .gate { min-height: 128px; padding: 15px; border: 1px solid var(--line); border-top: 4px solid var(--crest-gold); background: var(--white); color: inherit; cursor: pointer; text-align: left; }
+    .gate:hover, .gate.is-selected { border-color: var(--odpp-blue); background: var(--blue-tint); }
+    .gate-day { color: var(--odpp-blue); font: 600 1.44rem/1 "Cormorant Garamond", Georgia, serif; }
+    .gate-label { display: block; margin-top: 9px; color: var(--deep-blue); font-size: .77rem; font-weight: 700; }
+    .gate-owner { display: block; margin-top: 4px; color: var(--muted); font-size: .7rem; }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+    .summary { display: flex; align-items: center; gap: 12px; min-height: 86px; padding: 12px 14px; border: 1px solid var(--line); background: var(--white); color: var(--deep-blue); }
+    .summary-ring { position: relative; width: 62px; height: 62px; flex: 0 0 auto; border-radius: 50%; background: conic-gradient(var(--ring-colour) 0 var(--progress), #e0e9f7 var(--progress) 100%); }
+    .summary-ring::after { position: absolute; inset: 11px; display: grid; place-items: center; border-radius: 50%; background: var(--white); color: var(--deep-blue); content: attr(data-value); font: 600 1.25rem/1 "Cormorant Garamond", Georgia, serif; }
+    .summary span { color: var(--deep-blue); font-size: .69rem; font-weight: 700; line-height: 1.35; }
+
+    .team-tabs { display: flex; gap: 5px; padding-bottom: 13px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+    .team-tab { border: 0; padding: 4px 7px; background: transparent; color: var(--muted); cursor: pointer; font-size: .7rem; font-weight: 700; white-space: nowrap; }
+    .team-tab:hover, .team-tab.is-active { color: var(--odpp-blue); text-decoration: underline; text-underline-offset: 5px; }
+    .team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+    .person { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 10px; min-height: 150px; padding: 13px; border: 1px solid var(--line); background: var(--white); color: inherit; text-align: left; cursor: pointer; }
+    .person:hover, .person.is-selected { border-color: var(--odpp-blue); background: var(--blue-tint); }
+    .initials { color: var(--odpp-blue); font-size: .68rem; font-weight: 700; letter-spacing: .06em; }
+    .person strong { display: block; color: var(--deep-blue); font-size: .78rem; }
+    .person span { display: block; margin-top: 4px; color: var(--muted); font-size: .67rem; line-height: 1.3; }
+    .person::after { color: var(--odpp-blue); content: "View responsibilities ->"; font-size: .67rem; font-weight: 700; }
+
+    .plan { padding-bottom: 0; }
+    .table-wrap { overflow-x: auto; margin: 0 -46px; }
+    table { width: 100%; min-width: 850px; border-collapse: collapse; font-size: .77rem; }
+    th { padding: 10px 16px; background: var(--deep-blue); color: white; text-align: left; font-size: .66rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    td { padding: 11px 16px; border-top: 1px solid var(--line); vertical-align: top; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover, tbody tr.is-selected { background: var(--blue-tint); }
+    tbody tr.gate-row { background: #fffbe6; }
+    .day-cell { color: var(--odpp-blue); font: 600 1.15rem/1 "Cormorant Garamond", Georgia, serif; }
+    .phase-cell { color: var(--deep-blue); font-weight: 700; }
+    .gate-cell { color: var(--crest-red); font-weight: 700; }
+
+    .detail { position: sticky; bottom: 0; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding: 14px 46px; border-top: 4px solid var(--crest-gold); background: var(--deep-blue); color: white; }
+    .detail-label { color: var(--crest-gold); font-size: .66rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .detail-title { font: 600 1.3rem/1 "Cormorant Garamond", Georgia, serif; }
+    .detail-copy { margin: 3px 0 0; color: #dbe6fa; font-size: .76rem; }
+    .detail-close { width: 30px; height: 30px; border: 1px solid #7794c7; background: transparent; color: white; cursor: pointer; font-size: 1rem; }
+
+    @media (max-width: 800px) {
+      .sheet { margin: 24px auto; } .masthead { grid-template-columns: 1fr; gap: 20px; padding: 28px; } .identity { gap: 14px; }
+      .section { padding: 25px 28px; } .phase-overview { grid-template-columns: 126px 1fr; gap: 17px; } .phase-donut { width: 126px; height: 126px; } .phase-donut__centre { inset: 32px; } .phase-grid { grid-template-columns: repeat(3, 1fr); } .phase:nth-child(3) { border-right: 0; } .phase:nth-child(-n+3) { border-bottom: 1px solid var(--line); }
+      .gate-grid { grid-template-columns: repeat(2, 1fr); } .team-grid { grid-template-columns: repeat(2, 1fr); } .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .table-wrap { margin: 0 -28px; } .detail { padding: 13px 28px; }
+    }
+    @media (max-width: 520px) {
+      .nav-inner { width: min(100% - 28px, 1120px); gap: 8px 18px; } .sheet { width: 100%; margin: 0; border-top-width: 5px; box-shadow: none; }
+      .masthead, .section { padding-left: 20px; padding-right: 20px; } .metric-row { grid-template-columns: repeat(2, 1fr); } .metric:nth-child(2) { border-right: 0; } .metric:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .phase-overview { grid-template-columns: 1fr; justify-items: center; } .phase-grid, .gate-grid, .team-grid { grid-template-columns: 1fr; width: 100%; } .phase { min-height: 69px; border-right: 0; border-bottom: 1px solid var(--line); } .phase:nth-child(3) { border-right: 0; } .phase:last-child { border-bottom: 0; }
+      .section-head { align-items: start; flex-direction: column; gap: 5px; } .table-wrap { margin: 0 -20px; } .detail { grid-template-columns: 1fr auto; padding: 12px 20px; } .detail-label { grid-column: 1; } .detail-close { grid-column: 2; grid-row: 1 / span 2; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Workplan navigation"><div class="nav-inner"><p class="nav-title">ODPP Complaints Management System</p><button class="nav-link" aria-current="page">Roadmap Home</button><button class="nav-link" data-scroll="phases">Phases</button><button class="nav-link" data-scroll="gates">Decision Gates</button><button class="nav-link" data-scroll="team">Team</button><button class="nav-link" data-scroll="workplan">Workplan</button></div></nav>
+
+  <main class="sheet">
+    <header class="masthead">
+      <div class="identity">
+        <div class="identity-row"><img class="crest" src="brand/odpp-crest.png" alt="ODPP coat of arms"><p class="kicker">Office of the Director of Public Prosecutions<br>Complaints Management System</p></div>
+        <div><h1>18-Day<br>Roadmap<br>to a <em>Working<br>Proof of<br>Concept</em></h1><p class="intro">Every element on this page is interactive. Select a phase, a gate, a team member, or any day of the workplan to open its detail. Colour indicates discipline throughout.</p></div>
+      </div>
+      <div class="metric-row" aria-label="Roadmap metrics"><div class="metric"><strong>18</strong><span>Days</span></div><div class="metric"><strong>6</strong><span>Phases</span></div><div class="metric"><strong>5</strong><span>Gates</span></div><div class="metric"><strong>11</strong><span>Owners</span></div></div>
+    </header>
+
+    <section class="section" id="phases"><div class="section-head"><h2>Division of the 18 days</h2><p class="hint">Select a phase</p></div><div class="phase-overview"><div class="phase-donut" aria-label="18 days distributed across six phases"><div class="phase-donut__centre"><strong>18</strong><span>days</span></div></div><div class="phase-grid" id="phase-grid"></div></div></section>
+    <section class="section" id="gates"><div class="section-head"><h2>The five decision gates</h2><p class="hint">Select a gate</p></div><div class="gate-grid" id="gate-grid"></div><div class="summary-grid"><div class="summary"><span class="summary-ring" style="--ring-colour: var(--odpp-blue); --progress: 55.6%;" data-value="10"></span><span>Days before development begins</span></div><div class="summary"><span class="summary-ring" style="--ring-colour: var(--deep-blue); --progress: 27.8%;" data-value="5"></span><span>Days of development</span></div><div class="summary"><span class="summary-ring" style="--ring-colour: #2d6cbd; --progress: 16.7%;" data-value="3"></span><span>Days of assurance and proof</span></div><div class="summary"><span class="summary-ring" style="--ring-colour: var(--crest-red); --progress: 100%;" data-value="5"></span><span>Decision gates</span></div></div></section>
+    <section class="section" id="team"><div class="section-head"><h2>The Team</h2><p class="hint">Select a name to open responsibilities</p></div><div class="team-tabs" id="team-tabs"></div><div class="team-grid" id="team-grid"></div></section>
+    <section class="section plan" id="workplan"><div class="section-head"><h2>The Workplan</h2><p class="hint">Select any day to open its full detail. Gold rows are decision gates.</p></div><div class="table-wrap"><table><thead><tr><th>Day</th><th>Phase</th><th>Activity</th><th>Accountable</th><th>Output</th><th>Gate</th></tr></thead><tbody id="plan-body"></tbody></table></div></section>
+  </main>
+
+  <aside class="detail" id="detail" aria-live="polite"><span class="detail-label" id="detail-label">Roadmap</span><div><div class="detail-title" id="detail-title">18-day working proof of concept</div><p class="detail-copy" id="detail-copy">Select a phase, gate, team member, or workplan day to view its delivery detail.</p></div><button class="detail-close" id="detail-close" aria-label="Close detail">×</button></aside>
+
+  <script>
+    const phases = [
+      {day: '01-04', name: 'Discovery', range: 'Days 1-4', detail: 'Gather the working evidence: access, current forms, complaints workflow, and accountable owners. Gate 1 confirms information is complete.'},
+      {day: '05-07', name: 'Analysis', range: 'Days 5-7', detail: 'Map the current process, identify legal constraints, and set the proof-of-concept boundary in writing. Gate 2 locks scope.'},
+      {day: '08-10', name: 'Design', range: 'Days 8-10', detail: 'Define data, routing rules, and one screen journey for each role. Gate 3 is the independent design approval.'},
+      {day: '11-15', name: 'Build', range: 'Days 11-15', detail: 'Provision environments and deliver the data layer, intake, role queues, SLA engine, audit ledger, and dashboard. Gate 4 freezes the build.'},
+      {day: '16-17', name: 'Assure', range: 'Days 16-17', detail: 'Test against the signed scope statement, remediate defects, and complete technical and legal review.'},
+      {day: '18', name: 'Prove', range: 'Day 18', detail: 'Demonstrate the working proof of concept to sponsors and present the costed full-build proposal for acceptance.'}
+    ];
+    const gates = [
+      {day: '4', gate: 'Gate 1', label: 'Information Complete', owner: 'A. Situma', detail: 'The required access, forms, interview notes, and information pack are complete and signed off.'},
+      {day: '7', gate: 'Gate 2', label: 'Scope Locked', owner: 'N. Mpanga · M. Okwalinga', detail: 'The documented proof-of-concept boundary, legal constraints, and requirements are approved.'},
+      {day: '10', gate: 'Gate 3', label: 'Design Approved', owner: 'D. Egwell', detail: 'The data model, routing rules, screen flows, and technical approach are approved to build.'},
+      {day: '15', gate: 'Gate 4', label: 'Build Complete', owner: 'M. Mulondo · N. Kitiibwa', detail: 'The functional proof of concept is complete, audited, demonstrated internally, and frozen for assurance.'},
+      {day: '18', gate: 'Gate 5', label: 'Sponsor Acceptance', owner: 'Ntaate · Walusimbi', detail: 'Sponsors accept the demonstration and the full-build proposal is ready for the next investment decision.'}
+    ];
+    const team = [
+      ['Sponsorship','JBN','John Bosco Ntaate','Project Sponsor & Success Champion','Sponsors the outcome, removes delivery blockers, and accepts the proof of concept.'],
+      ['Sponsorship','IW','Isaac Walusimbi','Project Sponsor & Success Champion','Provides executive sponsorship, milestone decisions, and delivery oversight.'],
+      ['ODPP counterpart','AH','Akora Herbert','DPP IT Officer · Point of Contact & Liaison','Coordinates ODPP access, evidence, stakeholder availability, and ICT alignment.'],
+      ['Delivery leadership & QA','NK','Nabilah Kitiibwa','Project Lead & QA Manager','Owns scope discipline, delivery cadence, quality evidence, and gate readiness.'],
+      ['Delivery leadership & QA','MM','Moses Mulondo','Quality Assurance','Runs workflow validation, defect verification, and release-readiness checks.'],
+      ['Engineering','DB','Deogratius Bagenda','Lead Developer','Leads Python/Django delivery across data models, complaint workflow, routing, and technical build.'],
+      ['Information & process','AS','Ambrose Situma','Lead, Information Gathering (ODPP)','Leads interviews, artefact collection, process evidence, and information-pack sign-off.'],
+      ['Information & process','NM','Nicholas Mpanga','Lead, Process & Delivery Discipline','Maps the as-is process, defines hand-offs, and keeps the proof-of-concept boundary precise.'],
+      ['Legal','MO','Moses Okwalinga','Legal Liaison & Counsel','Reviews legal terminology, procedural constraints, and compliance requirements.'],
+      ['Engineering','DE','David Egwell','Technical Review','Performs independent technical review before the design and build gates.'],
+      ['Engineering','MK','Michael Kasingye','DevOps & Environments','Provisions environments and prepares deployment and ICT handover.'],
+      ['Commercial','MKa','Mercilus Katandi','Sales Process & Procurement','Supports the costed full-build proposal and procurement handover.']
+    ];
+    const workplan = [
+      [1,'Discovery','Mobilise team; lodge ODPP access request','N. Kitiibwa · A. Situma · A. Herbert','Team charter; access request',''],
+      [2,'Discovery','Interview the complaints desk','A. Situma','Interview notes; forms collected',''],
+      [3,'Discovery','Interview RSA, HQ Inspections, DPP Executive','A. Situma · N. Mpanga','Responsibility matrix (draft)',''],
+      [4,'Discovery','Close information gathering','A. Situma · Sponsors','Information pack, signed off','Gate 1'],
+      [5,'Analysis','Draw the as-is process end to end','N. Mpanga','As-is process map v1',''],
+      [6,'Analysis','Establish legal and compliance constraints','M. Okwalinga','Legal constraints memorandum',''],
+      [7,'Analysis','Confirm requirements; fix scope in writing','N. Kitiibwa · N. Mpanga','Signed PoC scope statement','Gate 2'],
+      [8,'Design','Data model and explicit routing rules','M. Mulondo','Data model and rule set',''],
+      [9,'Design','Screen flows, one journey per role','M. Mulondo · N. Kitiibwa','Annotated screen flows',''],
+      [10,'Design','Independent design review; sponsors briefed','D. Egwell · Sponsors','Design approved to build','Gate 3'],
+      [11,'Build','Environments provisioned; data layer, roles, seed data','M. Mulondo · M. Kasingye','Environments; data and role layer',''],
+      [12,'Build','Intake, reference generation, rule-driven routing','M. Mulondo','Intake and routing demonstrable',''],
+      [13,'Build','Officer queues and enforced access boundaries','M. Mulondo','Role queues live and enforced',''],
+      [14,'Build','Workflow, service-level clock, auto-escalation','M. Mulondo','Workflow and SLA engine',''],
+      [15,'Build','Audit ledger and dashboard; build frozen','M. Mulondo · N. Kitiibwa','Build-complete PoC','Gate 4'],
+      [16,'Assure','QA pass against the Day 7 scope statement','N. Kitiibwa','Test results; ranked defect log',''],
+      [17,'Assure','Defect remediation; technical and legal review','M. Mulondo · D. Egwell · M. Okwalinga · M. Kasingye','Zero critical defects; demo environment ready',''],
+      [18,'Prove','Live demonstration; costed full-build proposal','N. Kitiibwa · M. Katandi · Sponsors','Sponsor acceptance; next-step proposal','Gate 5']
+    ];
+    const detail = (label, title, copy) => { document.getElementById('detail-label').textContent = label; document.getElementById('detail-title').textContent = title; document.getElementById('detail-copy').textContent = copy; };
+    const select = (node) => { document.querySelectorAll('.is-selected').forEach(item => item.classList.remove('is-selected')); node.classList.add('is-selected'); };
+
+    const phaseGrid = document.getElementById('phase-grid');
+    phases.forEach(phase => { const button = document.createElement('button'); button.className = 'phase'; button.innerHTML = `<span class="day">${phase.day}</span><span class="name">${phase.name}</span><span class="range">${phase.range}</span>`; button.addEventListener('click', () => { select(button); detail('Phase', `${phase.name} | ${phase.range}`, phase.detail); }); phaseGrid.append(button); });
+    const gateGrid = document.getElementById('gate-grid');
+    gates.forEach(gate => { const button = document.createElement('button'); button.className = 'gate'; button.innerHTML = `<span class="gate-day">${gate.day}</span><span class="gate-label">${gate.gate}<br>${gate.label}</span><span class="gate-owner">${gate.owner}</span>`; button.addEventListener('click', () => { select(button); detail(gate.gate, `${gate.label} | Day ${gate.day}`, gate.detail); }); gateGrid.append(button); });
+    const groups = [...new Set(team.map(person => person[0]))]; const tabs = document.getElementById('team-tabs'); const teamGrid = document.getElementById('team-grid');
+    const renderTeam = group => { teamGrid.replaceChildren(); document.querySelectorAll('.team-tab').forEach(tab => tab.classList.toggle('is-active', tab.dataset.group === group)); team.filter(person => person[0] === group).forEach(person => { const button = document.createElement('button'); button.className = 'person'; button.innerHTML = `<span class="initials">${person[1]}</span><span><strong>${person[2]}</strong><span>${person[3]}</span></span>`; button.addEventListener('click', () => { select(button); detail('Team responsibility', person[2], person[4]); }); teamGrid.append(button); }); };
+    groups.forEach(group => { const button = document.createElement('button'); button.className = 'team-tab'; button.dataset.group = group; button.textContent = group; button.addEventListener('click', () => renderTeam(group)); tabs.append(button); }); renderTeam(groups[0]);
+    const body = document.getElementById('plan-body');
+    workplan.forEach(row => { const tr = document.createElement('tr'); if (row[5]) tr.className = 'gate-row'; tr.innerHTML = `<td class="day-cell">${row[0]}</td><td class="phase-cell">${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td><td class="gate-cell">${row[5]}</td>`; tr.addEventListener('click', () => { select(tr); detail(`Day ${row[0]} | ${row[1]}`, row[2], `Accountable: ${row[3]}. Required output: ${row[4]}.${row[5] ? ` Decision gate: ${row[5]}.` : ''}`); }); body.append(tr); });
+    document.querySelectorAll('[data-scroll]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.scroll).scrollIntoView({behavior: 'smooth'})));
+    document.getElementById('detail-close').addEventListener('click', () => detail('Roadmap', '18-day working proof of concept', 'Select a phase, gate, team member, or workplan day to view its delivery detail.'));
+  </script>
+</body>
+</html>
