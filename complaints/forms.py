@@ -31,6 +31,15 @@ class PublicTrackingForm(forms.Form):
     pin = forms.CharField(min_length=6, max_length=6, label='Six-digit PIN', widget=forms.PasswordInput)
 
 
+class StakeholderVerifyForm(forms.Form):
+    nin = forms.CharField(max_length=14, label='National ID number (NIN)')
+
+
+class GuidedComplaintForm(forms.Form):
+    subject = forms.CharField(max_length=240, label='What is the complaint about?')
+    narrative = forms.CharField(widget=forms.Textarea, label='Record what the complainant reported')
+
+
 class ComplaintAssignmentForm(forms.Form):
     assignee = forms.ModelChoiceField(queryset=StaffProfile.objects.none(), label='Assign to')
     reason = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), label='Reason for assignment')

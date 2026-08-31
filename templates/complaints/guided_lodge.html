@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}ODPP | Record complaint{% endblock %}
+{% block content %}
+<header class="odpp-utility"><div class="odpp-container odpp-utility__inner"><span>Complaints Management System &middot; Assisted-desk intake</span>{% include 'partials/staff_nav.html' %}</div></header>
+<header class="odpp-brandbar"><div class="odpp-container odpp-brandbar__inner"><img class="odpp-brandbar__crest" src="{% static 'odpp-crest.png' %}" alt="Office of the Director of Public Prosecutions coat of arms"><div><p class="odpp-eyebrow">Republic of Uganda</p><h1>Office of the Director of Public Prosecutions</h1><p class="odpp-brandbar__subtitle">Record what the complainant reported. They will leave with a reference and a one-time PIN.</p></div></div></header>
+<main class="odpp-page"><div class="odpp-container" style="max-width: 640px">
+<div class="odpp-page__header"><div><p class="odpp-eyebrow">Step 3 of 3</p><h2>Record the complaint</h2></div></div>
+<div class="odpp-card" style="margin-bottom: 18px"><div class="odpp-card__body"><p class="odpp-eyebrow">Verified complainant</p><p class="odpp-reference">{{ party.full_name }}</p><p class="odpp-muted">{{ party.get_role_display }} on case {{ case.reference }}</p></div></div>
+<form method="post" class="odpp-card"><div class="odpp-card__body" style="display: grid; gap: 16px">{% csrf_token %}{% for field in form %}<div class="odpp-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<span class="signin-error">{{ error }}</span>{% endfor %}</div>{% endfor %}<button class="odpp-button" type="submit">Submit complaint</button></div></form>
+</div></main>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}ODPP | Look up a case{% endblock %}
+{% block content %}
+<header class="odpp-utility"><div class="odpp-container odpp-utility__inner"><span>Complaints Management System &middot; Assisted-desk intake</span>{% include 'partials/staff_nav.html' %}</div></header>
+<header class="odpp-brandbar"><div class="odpp-container odpp-brandbar__inner"><img class="odpp-brandbar__crest" src="{% static 'odpp-crest.png' %}" alt="Office of the Director of Public Prosecutions coat of arms"><div><p class="odpp-eyebrow">Republic of Uganda</p><h1>Office of the Director of Public Prosecutions</h1><p class="odpp-brandbar__subtitle">Find the case the visiting complainant is referring to before recording their complaint.</p></div></div></header>
+<main class="odpp-page"><div class="odpp-container">
+<div class="odpp-page__header"><div><p class="odpp-eyebrow">Step 1 of 3</p><h2>Look up the case</h2></div></div>
+<form method="get" class="odpp-card" style="margin-bottom: 20px"><div class="odpp-card__body" style="display: flex; gap: 12px; align-items: end; flex-wrap: wrap"><div class="odpp-field" style="flex: 1; min-width: 220px"><label for="q">Case, SD/OB, CRB, or ODPP reference</label><input type="text" id="q" name="q" value="{{ query }}" placeholder="e.g. JINJA/CRB/2026/0901" autofocus></div><button class="odpp-button" type="submit">Search</button></div></form>
+{% if query %}
+<div class="odpp-table-wrap"><table class="odpp-table"><thead><tr><th>Reference</th><th>Title</th><th>Stage</th><th>Originating station</th><th></th></tr></thead><tbody>
+{% for case in cases %}<tr><td>{{ case.reference }}</td><td>{{ case.title }}</td><td><span class="odpp-badge odpp-badge--perusal">{{ case.get_stage_display }}</span></td><td>{{ case.originating_station }}</td><td><a class="odpp-button odpp-button--secondary" href="{% url 'complaint-verify-stakeholder' case.pk %}">Verify complainant</a></td></tr>
+{% empty %}<tr><td colspan="5">No case matches &ldquo;{{ query }}&rdquo;. Check the reference with the complainant and try again.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endif %}
+</div></main>
+{% endblock %}

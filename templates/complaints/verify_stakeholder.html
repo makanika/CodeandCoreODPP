@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}ODPP | Verify complainant{% endblock %}
+{% block content %}
+<header class="odpp-utility"><div class="odpp-container odpp-utility__inner"><span>Complaints Management System &middot; Assisted-desk intake</span>{% include 'partials/staff_nav.html' %}</div></header>
+<header class="odpp-brandbar"><div class="odpp-container odpp-brandbar__inner"><img class="odpp-brandbar__crest" src="{% static 'odpp-crest.png' %}" alt="Office of the Director of Public Prosecutions coat of arms"><div><p class="odpp-eyebrow">Republic of Uganda</p><h1>Office of the Director of Public Prosecutions</h1><p class="odpp-brandbar__subtitle">Confirm the person in front of you is a recorded stakeholder on this case.</p></div></div></header>
+<main class="odpp-page"><div class="odpp-container" style="max-width: 640px">
+<div class="odpp-page__header"><div><p class="odpp-eyebrow">Step 2 of 3</p><h2>Verify the complainant</h2></div></div>
+<div class="odpp-card" style="margin-bottom: 18px"><div class="odpp-card__body"><p class="odpp-eyebrow">Case</p><p class="odpp-reference">{{ case.reference }}</p><p class="odpp-muted">{{ case.title }}</p></div></div>
+<form method="post" class="odpp-card"><div class="odpp-card__body" style="display: grid; gap: 16px">{% csrf_token %}<p class="odpp-muted">Ask for their National ID number. It must match a stakeholder already recorded on this case, or the complaint cannot be lodged through this desk.</p><div class="odpp-field">{{ form.nin.label_tag }}{{ form.nin }}{% for error in form.nin.errors %}<span class="signin-error">{{ error }}</span>{% endfor %}</div><button class="odpp-button" type="submit">Verify</button></div></form>
+</div></main>
+{% endblock %}

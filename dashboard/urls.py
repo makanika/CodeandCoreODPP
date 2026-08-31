@@ -1,9 +1,10 @@
 from django.urls import path
 
-from .views import CaseDetailView, ComplaintDetailView, OperationalDashboardView, StaffDirectoryView, StaffWorkloadView
+from .views import CaseDetailView, ComplaintDetailView, ComplaintListView, OperationalDashboardView, StaffDirectoryView, StaffWorkloadView
 
 urlpatterns = [
     path('', OperationalDashboardView.as_view(), name='dashboard'),
+    path('complaints/', ComplaintListView.as_view(), name='complaint-queue'),
     path('complaints/<int:pk>/', ComplaintDetailView.as_view(), name='complaint-detail'),
     path('cases/<int:pk>/', CaseDetailView.as_view(), name='case-detail'),
     path('staff/', StaffDirectoryView.as_view(), name='staff-directory'),

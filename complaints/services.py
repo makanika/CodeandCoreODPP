@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
+from cases.models import CaseParty
 from staff.models import StaffProfile
 
 from .models import Complaint, ComplaintAssignment, ComplaintEvent, ComplaintSequence
@@ -59,7 +60,15 @@ def visible_complaints_for(profile):
     return queryset.filter(filters).distinct()
 
 
-def create_complaint(*, intake_channel, complainant_name, subject, narrative, related_case=None, supplied_case_reference='', complainant_nin='', complainant_phone='', complainant_email='', preferred_contact_channel='', captured_by=None, source_evidence_reference='', is_demo=False):
+def find_case_party(case, nin):
+    """Return the recorded case party matching this NIN, or None if the complainant cannot be verified as a stakeholder."""
+    nin = (nin or '').strip()
+    if not nin:
+        return None
+    return CaseParty.objects.filter(case=case, nin__iexact=nin).first()
+
+
+def create_complaint(*, intake_channel, complainant_name, subject, narrative, related_case=None, supplied_case_reference='', complainant_nin='', complainant_phone='', complainant_email='', preferred_contact_channel='', stakeholder_role='', captured_by=None, source_evidence_reference='', is_demo=False):
     now = timezone.now()
     with transaction.atomic():
         sequence, _ = ComplaintSequence.objects.select_for_update().get_or_create(year=now.year)
@@ -78,6 +87,7 @@ def create_complaint(*, intake_channel, complainant_name, subject, narrative, re
             complainant_phone=complainant_phone,
             complainant_email=complainant_email,
             preferred_contact_channel=preferred_contact_channel,
+            stakeholder_role=stakeholder_role,
             related_case=related_case,
             supplied_case_reference=supplied_case_reference,
             subject=subject,
@@ -169,9 +179,15 @@ def transition_type_b(complaint, *, resulting_status, actor=None, detail, automa
     complaint.status = resulting_status
     complaint.last_meaningful_update_at = timezone.now()
     complaint.save(update_fields=['status', 'last_meaningful_update_at'])
+    if resulting_status.startswith('ESCALATED'):
+        event_type = ComplaintEvent.EventType.ESCALATED
+    elif resulting_status == Complaint.Status.OPEN_RSA:
+        event_type = ComplaintEvent.EventType.INQUIRY_OPENED
+    else:
+        event_type = ComplaintEvent.EventType.DETERMINED
     ComplaintEvent.objects.create(
         complaint=complaint,
-        event_type=ComplaintEvent.EventType.ESCALATED if resulting_status.startswith('ESCALATED') else ComplaintEvent.EventType.DETERMINED,
+        event_type=event_type,
         actor=actor,
         detail=detail,
         previous_status=previous_status,

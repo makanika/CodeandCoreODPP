@@ -74,6 +74,29 @@ class CaseIdentifier(models.Model):
 	def __str__(self):
 		return f'{self.get_reference_type_display()}: {self.value}'
 
+class CaseParty(models.Model):
+	class Role(models.TextChoices):
+		COMPLAINANT = 'COMPLAINANT', 'Victim / complainant'
+		ACCUSED = 'ACCUSED', 'Accused / defendant'
+		NEXT_OF_KIN = 'NEXT_OF_KIN', 'Next of kin'
+		WITNESS = 'WITNESS', 'Witness / informant'
+		COUNSEL = 'COUNSEL', 'Legal representative'
+
+	case = models.ForeignKey(CaseReference, on_delete=models.PROTECT, related_name='parties')
+	role = models.CharField(max_length=16, choices=Role.choices)
+	full_name = models.CharField(max_length=160)
+	nin = models.CharField(max_length=14, verbose_name='NIN')
+	phone = models.CharField(max_length=32, blank=True)
+	recorded_by = models.ForeignKey(StaffProfile, null=True, blank=True, on_delete=models.PROTECT, related_name='recorded_case_parties')
+	recorded_at = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		ordering = ['case_id', 'role', 'full_name']
+		constraints = [models.UniqueConstraint(fields=['case', 'nin'], name='unique_case_party_nin')]
+
+	def __str__(self):
+		return f'{self.full_name} ({self.get_role_display()}) - {self.case.reference}'
+
 class CaseMovement(models.Model):
 	class MovementType(models.TextChoices):
 		DISPATCH = 'DISPATCH', 'Dispatch'

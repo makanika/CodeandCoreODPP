@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}ODPP | Lodge a complaint{% endblock %}
+{% block extra_head %}
+<style>.signin-error { margin: 0; color: #a8171d; font-size: .8rem; font-weight: 700; }</style>
+{% endblock %}
 {% block content %}
-<main class="odpp-page"><div class="odpp-container" style="max-width: 720px"><p class="odpp-eyebrow">Office of the Director of Public Prosecutions</p><h1>Lodge a service complaint</h1><p class="odpp-muted">Use this form for concerns about complaint handling, delay, communication, or custody. Do not include a password, bank details, or information that could put someone at risk.</p><form method="post" class="odpp-card" style="margin-top: 24px"><div class="odpp-card__body" style="display: grid; gap: 16px">{% csrf_token %}{% for error in form.non_field_errors %}<div class="odpp-alert odpp-alert--danger">{{ error }}</div>{% endfor %}{% for field in form %}<div class="odpp-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<span class="signin-error">{{ error }}</span>{% endfor %}</div>{% endfor %}<button class="odpp-button" type="submit">Submit complaint</button></div></form></div></main>
+{% include 'partials/public_header.html' with subtitle='Public complaint centre' %}
+<main class="odpp-page"><div class="odpp-container" style="max-width: 720px"><p class="odpp-eyebrow">Lodge a complaint</p><h1>Lodge a service complaint</h1><p class="odpp-muted">Use this form for concerns about complaint handling, delay, communication, or custody. Do not include a password, bank details, or information that could put someone at risk.</p><form method="post" class="odpp-card" style="margin-top: 24px"><div class="odpp-card__body" style="display: grid; gap: 16px">{% csrf_token %}{% for error in form.non_field_errors %}<div class="odpp-alert odpp-alert--danger">{{ error }}</div>{% endfor %}{% for field in form %}<div class="odpp-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<span class="signin-error">{{ error }}</span>{% endfor %}</div>{% endfor %}<button class="odpp-button" type="submit">Submit complaint</button></div></form><p class="odpp-muted" style="margin-top: 16px"><a href="{% url 'public-hub' %}">&larr; Back to the public complaint centre</a></p></div></main>
 {% endblock %}

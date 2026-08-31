@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}ODPP | Complaints queue{% endblock %}
+{% block content %}
+<header class="odpp-utility"><div class="odpp-container odpp-utility__inner"><span>Complaints Management System &middot; Complaints queue</span>{% include 'partials/staff_nav.html' %}</div></header>
+<header class="odpp-brandbar"><div class="odpp-container odpp-brandbar__inner"><img class="odpp-brandbar__crest" src="{% static 'odpp-crest.png' %}" alt="Office of the Director of Public Prosecutions coat of arms"><div><p class="odpp-eyebrow">Republic of Uganda</p><h1>Office of the Director of Public Prosecutions</h1><p class="odpp-brandbar__subtitle">Complaints within your permitted scope.</p></div></div></header>
+<main class="odpp-page"><div class="odpp-container">
+<div class="odpp-page__header"><div><p class="odpp-eyebrow">Complaints</p><h2>Complaints queue</h2></div><form method="get" class="odpp-field" style="min-width: 220px"><label for="status">Filter by status</label><select id="status" name="status" onchange="this.form.submit()"><option value="">All statuses</option>{% for value, label in status_choices %}<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></form></div>
+<div class="odpp-table-wrap"><table class="odpp-table"><thead><tr><th>Reference</th><th>Subject</th><th>Status</th><th>Priority</th><th>Assigned to</th><th>SLA</th><th>Updated</th></tr></thead><tbody>
+{% for complaint in complaints %}<tr><td><a href="{% url 'complaint-detail' complaint.pk %}">{{ complaint.reference }}</a></td><td>{{ complaint.subject }}</td><td><span class="odpp-badge odpp-badge--perusal">{{ complaint.get_status_display }}</span></td><td>{{ complaint.get_priority_display }}</td><td>{{ complaint.assigned_to|default:'Unassigned' }}</td><td>{% if complaint.sla_due_at and complaint.sla_due_at < now %}<span class="odpp-badge odpp-badge--breach">Overdue</span>{% elif complaint.sla_due_at %}{{ complaint.sla_due_at|date:'j M H:i' }}{% else %}&mdash;{% endif %}</td><td>{{ complaint.last_meaningful_update_at|date:'j M Y, H:i' }}</td></tr>
+{% empty %}<tr><td colspan="7">No complaints are visible within your permitted scope{% if selected_status %} for this status{% endif %}.</td></tr>{% endfor %}
+</tbody></table></div>
+{% if is_paginated %}<nav style="display: flex; gap: 14px; align-items: center; margin-top: 16px; font-size: .8rem">{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}">&larr; Previous</a>{% endif %}<span class="odpp-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}">Next &rarr;</a>{% endif %}</nav>{% endif %}
+</div></main>
+{% endblock %}

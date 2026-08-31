@@ -5,8 +5,8 @@ from .models import Complaint, ComplaintAssignment, ComplaintCommunication, Comp
 
 @admin.register(Complaint)
 class ComplaintAdmin(admin.ModelAdmin):
-	list_display = ('reference', 'classification', 'status', 'priority', 'related_case', 'assigned_to', 'sla_due_at', 'received_at')
-	list_filter = ('classification', 'status', 'priority', 'intake_channel', 'is_demo')
+	list_display = ('reference', 'classification', 'status', 'priority', 'stakeholder_role', 'related_case', 'assigned_to', 'sla_due_at', 'received_at')
+	list_filter = ('classification', 'status', 'priority', 'intake_channel', 'stakeholder_role', 'is_demo')
 	search_fields = ('reference', 'supplied_case_reference', 'related_case__reference')
 	readonly_fields = ('reference', 'tracking_pin_hash', 'qr_locator_id', 'received_at', 'last_meaningful_update_at')
 

@@ -5,7 +5,7 @@ from uuid import uuid4
 from django.conf import settings
 from django.db import models
 
-from cases.models import CaseReference
+from cases.models import CaseParty, CaseReference
 from common.models import Office
 from documents.models import Document
 from staff.models import StaffProfile
@@ -59,6 +59,7 @@ class Complaint(models.Model):
 	complainant_phone = models.CharField(max_length=32, blank=True)
 	complainant_email = models.EmailField(blank=True)
 	preferred_contact_channel = models.CharField(max_length=20, blank=True)
+	stakeholder_role = models.CharField(max_length=16, choices=CaseParty.Role.choices, blank=True)
 	related_case = models.ForeignKey(CaseReference, null=True, blank=True, on_delete=models.PROTECT, related_name='complaints')
 	supplied_case_reference = models.CharField(max_length=100, blank=True)
 	subject = models.CharField(max_length=240)

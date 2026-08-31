@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}ODPP | Complaints Management System{% endblock %}
+{% block extra_head %}
+<style>
+  body { min-height: 100vh; background: var(--blue-tint); }
+  .doors-page { padding: 46px 0 60px; }
+  .doors-intro { max-width: 640px; margin: 0 0 30px; }
+  .doors-intro p.odpp-eyebrow { margin-bottom: 10px; }
+  .doors-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .door { display: flex; flex-direction: column; gap: 10px; padding: 28px; border: 1px solid var(--line); border-top: 5px solid var(--odpp-blue); background: var(--white); color: inherit; text-decoration: none; box-shadow: var(--shadow-subtle); }
+  .door:hover { border-top-color: var(--crest-gold); background: #fbfdff; }
+  .door--public { border-top-color: var(--crest-gold); }
+  .door span.tag { color: var(--crest-red); font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .door h2 { margin-top: 4px; }
+  .door p { margin: 0; color: var(--muted); font-size: .87rem; }
+  .door .go { margin-top: 10px; color: var(--odpp-blue); font-size: .8rem; font-weight: 700; }
+  .doors-note { margin-top: 22px; color: var(--muted); font-size: .78rem; }
+  @media (max-width: 700px) { .doors-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+{% block content %}
+{% include 'partials/public_header.html' %}
+<main class="doors-page"><div class="odpp-container">
+  <div class="doors-intro"><p class="odpp-eyebrow">Case Pipeline &amp; Complaints Console</p><h1>Choose how you'd like to continue</h1><p class="odpp-muted" style="margin-top: 10px;">A controlled workspace for ODPP and police staff, and a plain-language route for the public to lodge or track a service complaint.</p></div>
+  <div class="doors-grid">
+    <a class="door" href="{% url 'staff-login' %}"><span class="tag">Staff</span><h2>Officer sign-in</h2><p>Sign in to the authenticated console to work case files, complaints, and conduct queues within your permitted scope.</p><span class="go">Sign in &rarr;</span></a>
+    <a class="door door--public" href="{% url 'public-hub' %}"><span class="tag">Public</span><h2>Public complaint centre</h2><p>Lodge a service complaint or check the status of one you've already submitted, using your reference and PIN.</p><span class="go">Continue &rarr;</span></a>
+  </div>
+  <p class="doors-note">Article 120, Constitution of the Republic of Uganda. This portal does not publish case outcomes or prosecution records.</p>
+</div></main>
+{% endblock %}

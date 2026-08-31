@@ -102,6 +102,31 @@ class OperationalDashboardView(LoginRequiredMixin, TemplateView):
 		return labels.get(role, 'Operational complaints workspace')
 
 
+class ComplaintListView(LoginRequiredMixin, ListView):
+	template_name = 'dashboard/complaint_queue.html'
+	context_object_name = 'complaints'
+	paginate_by = 25
+
+	def get_queryset(self):
+		profile = StaffProfile.objects.get(account=self.request.user)
+		queryset = visible_complaints_for(profile).select_related('related_case', 'assigned_to', 'assigned_office')
+		status = self.request.GET.get('status')
+		if status:
+			queryset = queryset.filter(status=status)
+		return queryset
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		profile = StaffProfile.objects.get(account=self.request.user)
+		context['profile'] = profile
+		context['is_director'] = is_director(profile)
+		context['can_access_conduct'] = can_access_conduct(profile)
+		context['status_choices'] = Complaint.Status.choices
+		context['selected_status'] = self.request.GET.get('status', '')
+		context['now'] = timezone.now()
+		return context
+
+
 class ComplaintDetailView(LoginRequiredMixin, DetailView):
 	template_name = 'complaints/detail.html'
 	context_object_name = 'complaint'

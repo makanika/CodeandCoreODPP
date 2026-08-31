@@ -1,12 +1,21 @@
 from base64 import b64encode
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import Http404, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
-from .forms import PublicComplaintForm, PublicTrackingForm
-from .services import create_complaint, qr_png, verify_tracking_credentials
+from cases.models import CaseParty, CaseReference
+
+from .forms import GuidedComplaintForm, PublicComplaintForm, PublicTrackingForm, StakeholderVerifyForm
+from .services import create_complaint, find_case_party, qr_png, verify_tracking_credentials
+
+
+@require_http_methods(['GET'])
+def public_hub(request):
+    return render(request, 'complaints/public_hub.html')
 
 
 @require_http_methods(['GET', 'POST'])
@@ -51,3 +60,59 @@ def track_complaint(request):
         if complaint is None:
             messages.error(request, 'The reference or PIN is not recognised. Check both values and try again.')
     return render(request, 'complaints/track.html', {'form': form, 'complaint': complaint})
+
+
+@login_required
+@require_http_methods(['GET'])
+def case_lookup(request):
+    query = request.GET.get('q', '').strip()
+    cases = []
+    if query:
+        cases = CaseReference.objects.filter(
+            Q(reference__icontains=query) | Q(identifiers__value__icontains=query),
+        ).distinct().select_related('originating_station')[:20]
+    return render(request, 'complaints/case_lookup.html', {'query': query, 'cases': cases})
+
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def verify_stakeholder(request, case_id):
+    case = get_object_or_404(CaseReference, pk=case_id)
+    form = StakeholderVerifyForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        party = find_case_party(case, form.cleaned_data['nin'])
+        if party is None:
+            messages.error(request, 'No stakeholder record on this case matches that NIN. The complaint cannot be recorded through this route.')
+        else:
+            request.session['verified_stakeholder'] = {'case_id': case.pk, 'party_id': party.pk}
+            return redirect('complaint-guided-lodge', case_id=case.pk)
+    return render(request, 'complaints/verify_stakeholder.html', {'case': case, 'form': form})
+
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def guided_lodge(request, case_id):
+    case = get_object_or_404(CaseReference, pk=case_id)
+    verified = request.session.get('verified_stakeholder')
+    if not verified or verified.get('case_id') != case.pk:
+        messages.error(request, 'Verify the complainant against this case before recording a complaint.')
+        return redirect('complaint-verify-stakeholder', case_id=case.pk)
+    party = get_object_or_404(CaseParty, pk=verified['party_id'], case=case)
+    form = GuidedComplaintForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        complaint = create_complaint(
+            intake_channel='ASSISTED_DESK',
+            complainant_name=party.full_name,
+            complainant_nin=party.nin,
+            complainant_phone=party.phone,
+            preferred_contact_channel='PHONE' if party.phone else '',
+            stakeholder_role=party.role,
+            related_case=case,
+            subject=form.cleaned_data['subject'],
+            narrative=form.cleaned_data['narrative'],
+            captured_by=request.user,
+        )
+        request.session.pop('verified_stakeholder', None)
+        request.session['complaint_receipt'] = {'reference': complaint.reference, 'pin': complaint.receipt_pin}
+        return redirect('complaint-receipt')
+    return render(request, 'complaints/guided_lodge.html', {'case': case, 'party': party, 'form': form})

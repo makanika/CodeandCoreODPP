@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}ODPP | Complaint receipt{% endblock %}
 {% block content %}
+{% include 'partials/public_header.html' with subtitle='Public complaint centre' %}
 <main class="odpp-page"><div class="odpp-container" style="max-width: 680px"><p class="odpp-eyebrow">Complaint received</p><h1>Keep this receipt safe</h1><section class="odpp-card" style="margin-top: 22px; border-top: 5px solid var(--crest-gold)"><div class="odpp-card__body"><p class="odpp-muted">Your complaint reference</p><p class="odpp-reference" style="font-size: 1.2rem">{{ reference }}</p><p class="odpp-muted">Your six-digit PIN</p><p class="odpp-reference" style="font-size: 1.2rem">{{ pin }}</p><img src="data:image/png;base64,{{ qr_base64 }}" width="160" height="160" alt="Receipt QR code"><p class="odpp-muted">Your PIN is shown only on this receipt. Use the reference and PIN to check your complaint status.</p><a class="odpp-button" href="{% url 'complaint-track' %}">Track complaint</a></div></section></div></main>
 {% endblock %}

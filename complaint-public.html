@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Alignment reference for the ODPP public complaint ingestion and case verification flow, checked against the shipped Django code.">
+  <title>ODPP | Public Complaint Ingestion — Alignment Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --odpp-blue: #1e4699;
+      --deep-blue: #12306b;
+      --blue-tint: #eaf0fa;
+      --crest-gold: #ffd200;
+      --crest-red: #d8232a;
+      --ink: #1a1a1a;
+      --muted: #5d6675;
+      --line: #b9cae4;
+      --paper: #f8fafd;
+      --white: #ffffff;
+      --exists: #16803b;
+      --partial: #b36b00;
+      --new: #1e4699;
+      --shadow: 0 3px 10px rgb(18 48 107 / 7%);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); font-family: "Nunito", sans-serif; font-size: 15px; line-height: 1.5; background: var(--paper); }
+    button { font: inherit; }
+    button:focus-visible, a:focus-visible { outline: 3px solid var(--crest-gold); outline-offset: 2px; }
+    h1, h2, h3 { font-family: "Cormorant Garamond", Georgia, serif; color: var(--deep-blue); font-weight: 600; line-height: 1.08; }
+
+    header { display: flex; flex-direction: column; }
+    .topbar { order: 2; background: var(--deep-blue); color: var(--white); }
+    .topbar-inner, .container { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar-inner { min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: .75rem; font-weight: 600; flex-wrap: wrap; }
+    .utility { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+    .utility span { display: inline-flex; align-items: center; gap: 6px; }
+    .utility i { width: 14px; height: 14px; color: var(--crest-gold); }
+
+    .masthead { order: 1; background: var(--odpp-blue); color: var(--white); }
+    .masthead-inner { width: min(980px, calc(100% - 40px)); min-height: 200px; margin: 0 auto; display: grid; grid-template-columns: 88px minmax(0, 1fr); align-content: center; align-items: center; gap: 19px; padding: 24px 0; }
+    .crest { width: 80px; height: 80px; object-fit: contain; }
+    .republic { margin: 0 0 6px; color: var(--crest-gold); font-size: .66rem; font-weight: 700; letter-spacing: .14em; }
+    h1 { margin: 0; max-width: 660px; color: var(--white); font-size: clamp(1.4rem, 2.3vw, 1.98rem); }
+    .subtitle { max-width: 620px; margin: 7px 0 0; color: #dbe6fa; font-size: .8rem; }
+
+    .site-nav { position: sticky; top: 0; z-index: 5; background: var(--deep-blue); border-bottom: 4px solid var(--crest-gold); }
+    .nav-inner { width: min(1080px, calc(100% - 40px)); min-height: 46px; margin: auto; display: flex; align-items: center; gap: 6px 22px; flex-wrap: wrap; padding: 8px 0; }
+    .nav-link { border: 0; border-bottom: 2px solid transparent; padding: 4px 0; background: transparent; color: #dce7fb; cursor: pointer; font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .nav-link:hover { border-color: var(--crest-gold); color: var(--crest-gold); }
+
+    .section { padding: 38px 0; border-bottom: 1px solid var(--line); background: var(--white); }
+    .section-tint { background: var(--blue-tint); }
+    .section-header { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 8px; color: var(--odpp-blue); font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    h2 { margin: 0; font-size: clamp(1.3rem, 1.8vw, 1.6rem); }
+    h3 { margin: 0; font-size: 1.05rem; }
+    .section-note { max-width: 400px; margin: 0; color: var(--muted); font-size: .8rem; }
+
+    .callout { margin: 0 0 26px; padding: 16px 19px; display: flex; gap: 13px; background: #fffbe6; border-left: 4px solid var(--crest-gold); box-shadow: var(--shadow); }
+    .callout i { flex: 0 0 auto; width: 20px; color: var(--partial); margin-top: 1px; }
+    .callout p { margin: 0; color: #4a3f10; font-size: .85rem; }
+    .callout strong { color: var(--ink); }
+
+    .chain { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+    .phase { position: relative; min-height: 210px; padding: 16px; background: var(--white); border: 1px solid var(--line); border-right: 0; }
+    .phase:last-child { border-right: 1px solid var(--line); }
+    .phase-num { color: var(--crest-red); font-size: .75rem; font-weight: 700; letter-spacing: .1em; }
+    .phase h3 { margin: 7px 0 10px; }
+    .phase p { margin: 0; color: #526078; font-size: .8rem; }
+    .record-list { margin: 12px 0 0; padding: 0; list-style: none; }
+    .record-list li { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); color: var(--deep-blue); font-size: .78rem; font-weight: 600; }
+
+    .reference-rail { margin: 20px 0 0; padding: 14px 17px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--deep-blue); color: white; font-weight: 700; }
+    .reference-rail i { width: 18px; color: var(--crest-gold); }
+    .reference-rail code { color: var(--crest-gold); font-family: "Nunito", sans-serif; font-size: .85rem; letter-spacing: .02em; }
+    .rail-arrow { color: #a9c3f6; }
+    .rail-tag { font-size: .64rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; }
+    .rail-tag.shipped { background: var(--exists); }
+    .rail-tag.proposed { background: var(--crest-red); }
+
+    .check-grid { display: grid; gap: 10px; }
+    .check-item { display: grid; grid-template-columns: 130px 1fr; gap: 16px; align-items: start; padding: 15px 18px; background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--line); }
+    .check-item.exists { border-left-color: var(--exists); }
+    .check-item.partial { border-left-color: var(--partial); }
+    .check-item.new { border-left-color: var(--new); }
+    .status-tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; font-size: .66rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: white; width: fit-content; }
+    .status-tag.exists { background: var(--exists); }
+    .status-tag.partial { background: var(--partial); }
+    .status-tag.new { background: var(--new); }
+    .check-item h3 { margin: 0 0 5px; font-size: .96rem; }
+    .check-item p { margin: 0; color: #46536a; font-size: .83rem; }
+    .check-item code { background: var(--blue-tint); padding: 1px 5px; font-size: .78rem; }
+
+    .table-wrap { overflow-x: auto; background: var(--white); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: .82rem; }
+    th { padding: 10px 13px; background: var(--deep-blue); color: white; text-align: left; font-size: .67rem; letter-spacing: .06em; text-transform: uppercase; }
+    td { padding: 11px 13px; vertical-align: top; border-top: 1px solid var(--line); }
+    tr:nth-child(even) td { background: #f7f9fc; }
+    td code { font-size: .78rem; background: var(--blue-tint); padding: 1px 4px; }
+    .verdict { font-weight: 700; font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+    .verdict.keep { color: var(--exists); }
+    .verdict.decide { color: var(--crest-red); }
+
+    .decision-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+    .decision-list li { display: flex; gap: 12px; padding: 14px 17px; background: var(--white); border: 1px solid var(--line); border-top: 3px solid var(--crest-red); }
+    .decision-list li span.num { flex: 0 0 auto; color: var(--crest-red); font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 1.4rem; line-height: 1; }
+    .decision-list p { margin: 0; color: #33415a; font-size: .86rem; }
+    .decision-list strong { color: var(--deep-blue); }
+
+    .path-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .path-card { padding: 17px; border: 1px solid var(--line); border-top: 4px solid var(--odpp-blue); background: var(--white); }
+    .path-card h3 { font-size: 1rem; margin-bottom: 8px; }
+    .path-card p { margin: 0; color: #46536a; font-size: .82rem; }
+
+    footer { padding: 20px 0; background: var(--ink); color: #dce3ef; font-size: .75rem; }
+    .footer-inner { width: min(1080px, calc(100% - 40px)); margin: 0 auto; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    footer strong { color: var(--crest-gold); }
+
+    @media (max-width: 860px) {
+      .chain { grid-template-columns: repeat(2, 1fr); }
+      .phase:nth-child(2) { border-right: 1px solid var(--line); }
+      .check-item { grid-template-columns: 1fr; }
+      .path-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .topbar-inner, .masthead-inner, .nav-inner { width: min(100% - 28px, 1080px); }
+      .masthead-inner { min-height: 150px; grid-template-columns: 60px minmax(0, 1fr); gap: 12px; }
+      .crest { width: 52px; height: 52px; }
+      .section { padding: 30px 0; }
+      .container { width: min(100% - 28px, 1080px); }
+      .chain { grid-template-columns: 1fr; }
+      .phase, .phase:nth-child(2) { border-right: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <span>Pre-implementation alignment check — not yet in the Django codebase</span>
+        <div class="utility"><span><i data-lucide="git-compare"></i>Blueprint vs. shipped code</span></div>
+      </div>
+    </div>
+    <div class="masthead">
+      <div class="masthead-inner">
+        <img class="crest" src="https://odpp-pack.africangraphyte.dev/uploads/ODPP-ICON.png" alt="ODPP coat of arms">
+        <div>
+          <p class="republic">REPUBLIC OF UGANDA</p>
+          <h1>Public Complaint Ingestion &amp; Case Verification</h1>
+          <p class="subtitle">A side-by-side read of the submitted blueprint against what's already built in <code>complaints/</code>, so we agree on the gaps before any code changes.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="site-nav" aria-label="Section navigation">
+    <div class="nav-inner">
+      <button class="nav-link" data-scroll="flow">Flow</button>
+      <button class="nav-link" data-scroll="checklist">Checklist status</button>
+      <button class="nav-link" data-scroll="reconciliation">Reconciliation</button>
+      <button class="nav-link" data-scroll="decisions">Decisions needed</button>
+      <button class="nav-link" data-scroll="path">Recommended path</button>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section" id="flow">
+      <div class="container">
+        <div class="section-header"><div><p class="eyebrow">01 — Submission flow</p><h2>Two intake doors, one schema, one verification portal</h2></div><p class="section-note">The blueprint describes an officer-guided desk flow. The shipped code already runs a self-service public flow through the same four stages.</p></div>
+        <div class="chain">
+          <article class="phase"><span class="phase-num">STAGE 1</span><h3>Intake</h3><p>Blueprint: officer looks up the case first, verifies NIN and stakeholder role, then opens the complaint.</p><ul class="record-list"><li>Shipped: public self-service form, no case lookup step</li></ul></article>
+          <article class="phase"><span class="phase-num">STAGE 2</span><h3>Django backend</h3><p>Generates reference, hashes the PIN, mints a QR locator.</p><ul class="record-list"><li>Shipped: <code style="background:var(--blue-tint);padding:1px 4px;font-size:.72rem">complaints/services.py</code></li></ul></article>
+          <article class="phase"><span class="phase-num">STAGE 3</span><h3>Receipt</h3><p>Reference, one-time PIN, QR code shown once.</p><ul class="record-list"><li>Shipped: <code style="background:var(--blue-tint);padding:1px 4px;font-size:.72rem">receipt.html</code></li></ul></article>
+          <article class="phase"><span class="phase-num">STAGE 4</span><h3>Nationwide verify</h3><p>Reference + PIN unlocks plain-language status, anywhere.</p><ul class="record-list"><li>Shipped: <code style="background:var(--blue-tint);padding:1px 4px;font-size:.72rem">track_complaint</code></li></ul></article>
+        </div>
+        <div class="reference-rail">
+          <i data-lucide="hash"></i><code>CMP/2026/000123</code><span class="rail-tag shipped">Shipped format</span>
+          <span class="rail-arrow">vs</span>
+          <code>ODPP-CMP-2026-A1B2C3D4</code><span class="rail-tag proposed">Blueprint format</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-tint" id="checklist">
+      <div class="container">
+        <div class="section-header"><div><p class="eyebrow">02 — Execution checklist, as it stands today</p><h2>What the blueprint asks for vs. what already exists</h2></div><p class="section-note">Read against <code style="background:var(--white);padding:1px 4px">complaints/models.py</code>, <code style="background:var(--white);padding:1px 4px">views.py</code>, <code style="background:var(--white);padding:1px 4px">services.py</code>, and the templates.</p></div>
+        <div class="check-grid">
+          <div class="check-item partial"><span class="status-tag partial"><i data-lucide="minus-circle" style="width:12px;height:12px"></i>Partial</span><div><h3>Data model extension</h3><p>NIN (<code>complainant_nin</code>) and a hashed PIN (<code>tracking_pin_hash</code>) already exist on <code>Complaint</code>. There is no <code>stakeholder_role</code> field and no stored QR image — the QR is generated on request, not persisted.</p></div></div>
+          <div class="check-item new"><span class="status-tag new"><i data-lucide="plus-circle" style="width:12px;height:12px"></i>New</span><div><h3>Stakeholder case lookup view</h3><p>Doesn't exist yet. Would search <code>CaseIdentifier</code> by <code>reference_type</code> + <code>value</code> — the blueprint's flat fields (<code>police_file_number</code>, <code>court_file_number</code>, <code>crb_number</code>) aren't how the real <code>CaseReference</code> model stores identifiers.</p></div></div>
+          <div class="check-item new"><span class="status-tag new"><i data-lucide="plus-circle" style="width:12px;height:12px"></i>New</span><div><h3>Officer-guided ingestion view</h3><p>Today's <code>lodge_complaint</code> is self-service only and hardcodes <code>intake_channel='PUBLIC_PORTAL'</code>. An assisted-desk path would reuse the same <code>create_complaint()</code> service with <code>intake_channel='ASSISTED_DESK'</code> and a passed-in <code>captured_by</code> officer — that channel enum already exists.</p></div></div>
+          <div class="check-item exists"><span class="status-tag exists"><i data-lucide="check-circle-2" style="width:12px;height:12px"></i>Exists, different design</span><div><h3>Receipt &amp; QR generation</h3><p><code>qr_png()</code> already renders a QR with the <code>qrcode</code> library. It's not stored as an <code>ImageField</code> — it's generated on the fly and inlined into the receipt as base64, and it encodes a signed opaque locator rather than a plain <code>?ref=</code> URL.</p></div></div>
+          <div class="check-item exists"><span class="status-tag exists"><i data-lucide="check-circle-2" style="width:12px;height:12px"></i>Exists, different design</span><div><h3>Nationwide verification portal</h3><p><code>track_complaint</code> + <code>track.html</code> already take reference + PIN and return plain-language status. It doesn't yet auto-populate from a scanned QR, because the QR doesn't carry the reference in cleartext (see reconciliation below).</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="reconciliation">
+      <div class="container">
+        <div class="section-header"><div><p class="eyebrow">03 — Reconciliation</p><h2>Where the blueprint's code would conflict with what's shipped</h2></div><p class="section-note">Dropping the pasted snippets in as-is would break or duplicate existing behaviour.</p></div>
+        <div class="callout"><i data-lucide="alert-triangle"></i><p><strong>Biggest one:</strong> the blueprint's <code>generate_qr_code()</code> encodes the plain reference in a public URL (<code>?ref=CMP...</code>). The brief's security boundary requires the QR locator to be <strong>opaque</strong> — the shipped design already does this correctly with a signed UUID locator, not a readable reference.</p></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Area</th><th>Blueprint proposes</th><th>Already shipped</th><th>Call</th></tr></thead>
+            <tbody>
+              <tr><td>Case model</td><td><code>Case</code> with flat <code>police_file_number</code>, <code>court_file_number</code>, <code>crb_number</code></td><td><code>CaseReference</code> with a related <code>CaseIdentifier</code> per reference type</td><td class="verdict decide">Decide</td></tr>
+              <tr><td>Reference format</td><td><code>ODPP-CMP-2026-XXXXXX</code>, random hex, year hardcoded</td><td><code>CMP/&lt;year&gt;/&lt;sequence&gt;</code>, per-year atomic sequence</td><td class="verdict keep">Keep shipped</td></tr>
+              <tr><td>PIN handling</td><td><code>make_password</code> / <code>check_password</code></td><td>Same — already implemented identically</td><td class="verdict keep">Matches</td></tr>
+              <tr><td>QR payload</td><td>Plain tracking URL with reference in the query string; image stored via <code>ImageField</code></td><td>Signed, opaque locator (<code>qr_locator_id</code>); rendered on demand, never persisted to storage</td><td class="verdict keep">Keep shipped</td></tr>
+              <tr><td>Case linkage</td><td><code>case</code> is a required FK — no complaint without a case</td><td><code>related_case</code> is optional; brief allows triage before a CRB reference is known</td><td class="verdict keep">Keep shipped</td></tr>
+              <tr><td>Stakeholder capture</td><td><code>stakeholder_role</code> choices + mandatory NIN before submission</td><td>NIN field exists and is optional; no role field at all</td><td class="verdict decide">Decide</td></tr>
+              <tr><td>View style</td><td>Class-based views (<code>View</code> subclasses)</td><td>Function-based views throughout <code>complaints/views.py</code></td><td class="verdict keep">Keep shipped convention</td></tr>
+              <tr><td>Templates</td><td>Extends <code>base.html</code> with Bootstrap classes (<code>card</code>, <code>btn-outline-dark</code>)</td><td>Extends <code>base.html</code> with the custom <code>odpp.css</code> component classes (<code>odpp-card</code>, <code>odpp-button</code>)</td><td class="verdict keep">Keep shipped convention</td></tr>
+              <tr><td>Session receipt</td><td><code>request.session['latest_complaint_receipt']</code></td><td><code>request.session['complaint_receipt']</code>, re-verified server-side before display</td><td class="verdict keep">Keep shipped</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-tint" id="decisions">
+      <div class="container">
+        <div class="section-header"><div><p class="eyebrow">04 — Decisions needed before I write anything</p><h2>Four questions the blueprint doesn't settle on its own</h2></div></div>
+        <ul class="decision-list">
+          <li><span class="num">1</span><p><strong>Is an officer-guided desk flow actually wanted as new scope?</strong> The brief already covers walk-in intake through the existing <code>ASSISTED_DESK</code> channel on the same form. A dedicated case-lookup-first screen is extra surface area — worth it only if desk officers need to search cases before a citizen states a reference.</p></li>
+          <li><span class="num">2</span><p><strong>Should <code>stakeholder_role</code> and NIN become mandatory?</strong> Right now NIN is optional and there's no role field. Making both required is a model + migration + form change, and affects the public form's friction.</p></li>
+          <li><span class="num">3</span><p><strong>Does the QR still need to stay opaque?</strong> The blueprint's plain <code>?ref=</code> URL is simpler to implement but exposes a real complaint reference to anyone who photographs the receipt. Recommend keeping the signed-locator design already shipped.</p></li>
+          <li><span class="num">4</span><p><strong>Domain in the blueprint (<code>odpp-complaints.codeandcore.dev</code>)</strong> — is that the actual pilot host, or a placeholder from the blueprint author? It doesn't appear in <code>core/settings.py</code> yet.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="path">
+      <div class="container">
+        <div class="section-header"><div><p class="eyebrow">05 — Recommended path, once we agree</p><h2>Build only the gap, in the shipped style</h2></div></div>
+        <div class="path-grid">
+          <article class="path-card"><h3>If desk lookup is wanted</h3><p>Add a <code>case_lookup</code> view searching <code>CaseIdentifier__value</code>, function-based, rendered with <code>odpp-*</code> classes — not a new design system.</p></article>
+          <article class="path-card"><h3>If stakeholder capture is wanted</h3><p>Migration adding <code>stakeholder_role</code> to <code>Complaint</code>; extend <code>PublicComplaintForm</code>; make NIN required only on the assisted-desk path, not the public one.</p></article>
+          <article class="path-card"><h3>Everything else</h3><p>No change — reference format, PIN hashing, QR opacity, and the tracking portal already satisfy the blueprint's intent through a different, brief-compliant implementation.</p></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner"><span><strong>Alignment reference</strong> | Public Complaint Ingestion &amp; Case Verification</span><span>Compare against <code style="color:#dce3ef">brief.md</code> §5 before implementation begins.</span></div>
+  </footer>
+  <script>
+    lucide.createIcons();
+    document.querySelectorAll('[data-scroll]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.scroll).scrollIntoView({behavior: 'smooth'})));
+  </script>
+</body>
+</html>
