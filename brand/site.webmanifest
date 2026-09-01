@@ -1,0 +1,17 @@
+{
+  "name": "ODPP Complaints Management System",
+  "short_name": "ODPP Complaints",
+  "description": "Office of the Director of Public Prosecutions complaints service.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EAF0FA",
+  "theme_color": "#1E4699",
+  "icons": [
+    {
+      "src": "/static/odpp-crest.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

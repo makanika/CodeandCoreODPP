@@ -1,11 +1,35 @@
 {% load static %}
+{% static 'odpp-share-card.png' as social_image_path %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="ODPP Case Pipeline and Complaints Console">
-  <title>{% block title %}ODPP Staff Sign-in{% endblock %}</title>
+  <title>{% block title %}ODPP | Complaints Management System{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Lodge or track a service complaint with the Office of the Director of Public Prosecutions, Uganda.{% endblock %}">
+  <meta name="robots" content="{% block robots %}{% if request.user.is_authenticated %}noindex, nofollow{% else %}index, follow{% endif %}{% endblock %}">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta name="theme-color" content="#1e4699">
+  <meta name="application-name" content="ODPP Complaints Management System">
+  <link rel="icon" href="{% static 'odpp-crest.png' %}" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'odpp-crest.png' %}">
+  <link rel="manifest" href="{% static 'site.webmanifest' %}">
+  <meta property="og:site_name" content="ODPP Complaints Management System">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{% block og_title %}ODPP | Complaints Management System{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Lodge or track a service complaint with the Office of the Director of Public Prosecutions, Uganda.{% endblock %}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ social_image_path }}">
+  <meta property="og:image:secure_url" content="{{ request.scheme }}://{{ request.get_host }}{{ social_image_path }}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Office of the Director of Public Prosecutions Uganda Complaints Management System">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block twitter_title %}ODPP | Complaints Management System{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}Lodge or track a service complaint with the Office of the Director of Public Prosecutions, Uganda.{% endblock %}">
+  <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ social_image_path }}">
+  <meta name="twitter:image:alt" content="Office of the Director of Public Prosecutions Uganda Complaints Management System">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
